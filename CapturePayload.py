@@ -1,14 +1,17 @@
+import hashlib
+
 import pandas as pd
 
 from typing import Dict, List, Tuple, Union
 
 from HeaderData import HeaderData
+from CaptureHeader import CaptureHeader
 from parse_payload import construct_time
-from utils import get_signal_name_head
+from utils import get_signal_name_head, hash_list
 
 
 class CapturePayload:
-    def __init__(self, data, header: HeaderData) -> None:
+    def __init__(self, data, header: HeaderData | CaptureHeader) -> None:
         self.data = construct_time(data, header.time)
         self.head = header
 
@@ -20,7 +23,7 @@ class CapturePayload:
             self,
             item: Union[str, Tuple[str, Union[str, int]]]
     ):
-        if not isinstance(item, tuple):
+        if not isinstance(item, (tuple, list)):
             item = (item, )
 
         group = item[0]
@@ -66,3 +69,6 @@ class CapturePayload:
             columns_new = [f"{key}|{el}" for el in self.head.groupby(group, key, "axis")]
             df.columns = columns_new
         return df
+
+    def hash_g_code(self) -> str:
+        return hash_list(self["HFBlockEvent", "GCode"])
