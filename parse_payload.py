@@ -74,12 +74,13 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
             yp = [to_unix_time(yp0)] + yp.to_list()
 
         for ky, val in mapping.items():
-            x = data[ky][val]
-            # (linear) interpolation
+            if ky in data:
+                x = data[ky][val]
+                # (linear) interpolation
 
-            y = np.interp(x, xp, yp)
+                y = np.interp(x, xp, yp)
 
-            data[ky]["Time"] = pd.to_datetime(pd.Series(y, name="Time"))
+                data[ky]["Time"] = pd.to_datetime(pd.Series(y, name="Time"))
     return data
 
 

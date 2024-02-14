@@ -1,7 +1,7 @@
-import re
-
 from typing import Dict, List, Tuple, Union
 from HeaderData import HeaderData, SignalHeader
+
+from utils import get_signal_name_head
 
 
 class CaptureHeader:
@@ -47,18 +47,17 @@ class CaptureHeader:
         else:
             raise Exception(f"Unknown signal {signal}. Signals can be grouped by {self.grouped_signals.keys()}")
 
+    def get_signal_header(self, group: str, name: str) -> SignalHeader | None:
+        for sig in self.signals[group]:
+            if sig.name == name:
+                return sig
+        return None
 
 def group_signal_names(signals: List[SignalHeader]):
-    re_group = re.compile("[\w\-\.:]+(?=\|\d)", re.ASCII)
-
     group: Dict[str, List[SignalHeader]] = dict()
     for sig in signals:
         string = sig.address
-        m = re_group.match(string)
-        if m:
-            name = m.group()
-        else:
-            name = string
+        name = get_signal_name_head(string)
 
         if name not in group:
             group[name] = []
