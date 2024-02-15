@@ -1,5 +1,3 @@
-import hashlib
-
 import pandas as pd
 
 from typing import Dict, List, Tuple, Union
@@ -8,6 +6,9 @@ from HeaderData import HeaderData, SignalHeaderHF, SignalHeaderLF
 from CaptureHeader import CaptureHeader
 from parse_payload import construct_time
 from utils import get_signal_name_head, hash_list
+
+# workaround to construct the type
+dict_keys = type({}.keys())
 
 
 class CapturePayload:
@@ -53,6 +54,12 @@ class CapturePayload:
             # rename columns
             df.columns = columns_new
         return df
+
+    def keys(self) -> dict_keys:
+        return self.data.keys()
+
+    def groups(self) -> dict_keys:
+        return self.keys()
 
     def groupby(
             self,
