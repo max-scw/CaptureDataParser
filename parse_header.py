@@ -1,8 +1,8 @@
 from dateutil import parser as datetime_parser
-import numpy as np
 import json
 
-from typing import List, Dict
+from typing import List, Dict, Literal
+import warnings
 
 from HeaderData import (
     HeaderData,
@@ -10,37 +10,35 @@ from HeaderData import (
     Machine,
     Job,
     TimeInfo,
-    SignalHeader
+    SignalHeaderHF,
+    SignalHeaderLF
 )
+from utils import cast_dtype
 
 
-def cast_dtype(dtype: str) -> type:
-    """
-    replace string-based data type by its actual numpy type
-    :param dtype: string specifying the data type
-    :return: data type
-    """
-    if dtype.upper() == "INTEGER":
-        return np.int32
-    elif dtype.upper() == "FLOAT":
-        return np.float32
-    elif dtype.upper() == "DOUBLE":
-        return np.double
-    elif dtype.upper() == "STRING":
-        return str
-    else:
-        raise Exception(f"Unrecognized data type {dtype}.")
-
-
-def parse_signals(signals: List[Dict[str, str]]) -> List[SignalHeader]:
+def parse_signals(signals: List[Dict[str, str]], mode: Literal["hf", "lf"]) -> List[SignalHeaderHF] | List[SignalHeaderLF]:
+    # {'Name': 'CYCLE', 'Type': 'INTEGER', 'Axis': 'Cycle', 'Address': 'CYCLE'}
     info = []
     for el in signals:
-        info.append(SignalHeader(
-            name=el["Name"],
-            dtype=cast_dtype(el["Type"]),
-            axis=el["Axis"],
-            address=el["Address"]
-        ))
+        if mode == "hf":
+            sig = SignalHeaderHF(
+                name=el["Name"],
+                dtype=cast_dtype(el["Type"]),
+                axis=el["Axis"],
+                address=el["Address"]
+            )
+        elif mode == "lf":
+            sig = SignalHeaderLF(
+                id=int(el["id"]),
+                device=el["device"],
+                address=el["path"],
+                name=el["label"] if el["label"] else None,
+                sampling_period_ms=int(el["samplingPeriod"])
+            )
+        else:
+            raise Exception(f"Unknown mode {mode}. Only 'hf' and 'lf' are supported.")
+
+        info.append(sig)
     return info
 
 
@@ -81,11 +79,13 @@ def parse_header(header: dict) -> HeaderData:
     # signals
     signals = dict()
     if "SignalListHFData" in header:
-        signals["HFData"] = parse_signals(header["SignalListHFData"])
+        signals["HFData"] = parse_signals(header["SignalListHFData"], "hf")
     if "SignalListLFData" in header:
-        signals["LFData"] = parse_signals(header["SignalListLFData"])
+        signals["LFData"] = parse_signals(header["SignalListLFData"], "lf")
     if "SignalListExternalData" in header:
-        signals["ExternalData"] = parse_signals(header["SignalListExternalData"])
+        if len(header["SignalListExternalData"]) > 0:
+            warnings.warn("SignalListExternalData not yet tested.")
+        signals["ExternalData"] = parse_signals(header["SignalListExternalData"], "hf")
 
     return HeaderData(
         version=version,

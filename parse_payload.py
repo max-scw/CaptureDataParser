@@ -5,12 +5,13 @@ from dateutil import parser as datetime_parser
 
 from typing import List, Dict, Tuple, Union, Any
 
-from HeaderData import SignalHeader, TimeInfo
+from HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
+from utils import cast_dtype
 
 
 def parse_payload(
         payload: List[Dict[str, List[List[Union[int, float]]]]],
-        signals_header: Dict[str, List[SignalHeader]]
+        signals_header: Dict[str, List[SignalHeaderHF | SignalHeaderLF]]
 ) -> Dict[str, pd.DataFrame]:
     data: Dict[str, List[Dict[str, Any]]] = dict()
     for msg in payload:
@@ -22,9 +23,24 @@ def parse_payload(
 
                 # loop through all entrys in this message
                 for row in val:
-                    assert len(row) == len(head)
+                    # assert len(row) == len(head)
+                    if ky == "LFData":
+                        assert all(el in row for el in ["address", "value", "value_type", "timestamp"])
+                        # get correct header
+                        for hd in head:
+                            if hd.address == row["address"]:
+                                break
+                        # standard message contents
+                        datapoint = {
+                            hd.address: cast_dtype(row["value_type"])(row["value"]),
+                            "Time": datetime_parser.parse(row["timestamp"])
+                        }
+                        # add hf probe counter if available
+                        if "HFProbeCounter" in row:
+                            datapoint["HFProbeCounter"] = row["HFProbeCounter"]
+                    else:  # "HFData"
+                        datapoint = {hd.name: hd.dtype(el) for el, hd in zip(row, head)}
 
-                    datapoint = {info.name: info.dtype(el) for el, info in zip(row, head)}
                     datapoints.append(datapoint)
             elif ky in ["HFCallEvent", "HFBlockEvent", "HFTimestamp"]:
                 # parse timestamp if exists

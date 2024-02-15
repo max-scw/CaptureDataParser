@@ -4,7 +4,7 @@ import pandas as pd
 
 from typing import Dict, List, Tuple, Union
 
-from HeaderData import HeaderData
+from HeaderData import HeaderData, SignalHeaderHF, SignalHeaderLF
 from CaptureHeader import CaptureHeader
 from parse_payload import construct_time
 from utils import get_signal_name_head, hash_list
@@ -43,8 +43,10 @@ class CapturePayload:
                 # get_signal_name_head(col)
                 sig_head = self.head.get_signal_header(group, col)
                 if sig_head is not None:
-                    col_new = f"{sig_head.name}|{sig_head.axis}"
-                    # TODO: what are the axis for NC-variables?
+                    col_new = sig_head.name
+                    if isinstance(sig_head, SignalHeaderHF) and sig_head.axis.lower() not in ["cycle"]:
+                        col_new += f"|{sig_head.axis}"
+                        # TODO: what are the axis for NC-variables?
                 else:
                     col_new = col
                 columns_new.append(col_new)

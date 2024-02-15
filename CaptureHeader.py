@@ -1,5 +1,5 @@
 from typing import Dict, List, Tuple, Union
-from HeaderData import HeaderData, SignalHeader
+from HeaderData import HeaderData, SignalHeaderHF, SignalHeaderLF
 
 from utils import get_signal_name_head
 
@@ -27,34 +27,40 @@ class CaptureHeader:
 
     def _group_signals(self):
         # group signals
-        grouped: Dict[str, Dict[str, List[SignalHeader]]] = dict()
+        grouped: Dict[str, Dict[str, List[SignalHeaderHF] | List[SignalHeaderLF]]] = dict()
         for ky, vl in self.signals.items():
             grouped[ky] = group_signal_names(vl)
         return grouped
 
-    def groupby(self, signal: str, key: str, attribute: str = None) -> Union[Dict[str, List[SignalHeader]], List[SignalHeader], List[str]]:
-        if signal in self.grouped_signals:
-            if key in self.grouped_signals[signal]:
+    def groupby(
+            self,
+            group: str,
+            key: str,
+            attribute: str = None
+    ) -> Union[Dict[str, List[SignalHeaderHF] | List[SignalHeaderLF]], List[SignalHeaderHF], List[SignalHeaderLF], List[str]]:
+        if group in self.grouped_signals:
+            if key in self.grouped_signals[group]:
                 if attribute is not None:
-                    if attribute in SignalHeader.__fields__:
-                        return [el.__getattribute__(attribute) for el in self.grouped_signals[signal][key]]
+                    if attribute in self.signals[group][0].__fields__:
+                        return [el.__getattribute__(attribute) for el in self.grouped_signals[group][key]]
                     else:
                         raise Exception(f"Unknown attribute {attribute} for key {key}.")
                 else:
-                    return self.grouped_signals[signal][key]
+                    return self.grouped_signals[group][key]
             else:
-                raise Exception(f"Unknown key for signal {signal}. Signal has only these keys: {self.grouped_signals[signal].keys()}.")
+                raise Exception(f"Unknown key for signal {group}. Signal has only these keys: {self.grouped_signals[group].keys()}.")
         else:
-            raise Exception(f"Unknown signal {signal}. Signals can be grouped by {self.grouped_signals.keys()}")
+            raise Exception(f"Unknown signal {group}. Signals can be grouped by {self.grouped_signals.keys()}")
 
-    def get_signal_header(self, group: str, name: str) -> SignalHeader | None:
+    def get_signal_header(self, group: str, name: str) -> SignalHeaderHF | SignalHeaderLF | None:
         for sig in self.signals[group]:
             if sig.name == name:
                 return sig
         return None
 
-def group_signal_names(signals: List[SignalHeader]):
-    group: Dict[str, List[SignalHeader]] = dict()
+
+def group_signal_names(signals: List[SignalHeaderHF] | List[SignalHeaderLF]):
+    group: Dict[str, List[SignalHeaderHF] | List[SignalHeaderLF]] = dict()
     for sig in signals:
         string = sig.address
         name = get_signal_name_head(string)

@@ -35,12 +35,24 @@ class Job(BaseModel):
     trigger_off: Dict[str, str]
 
 
-class SignalHeader(BaseModel):
+class SignalHeaderHF(BaseModel):
     # {'Name': 'CYCLE', 'Type': 'INTEGER', 'Axis': 'Cycle', 'Address': 'CYCLE'}
     name: str
     dtype: type
     axis: str
     address: str
+    # id: int
+    # sampling_period
+
+
+class SignalHeaderLF(BaseModel):
+    # {'id': '0', 'device': '/Channel/State/actToolIdent', 'path': '/Channel/State/actToolIdent', 'label': '', 'samplingPeriod': 500}
+    id: int
+    device: str
+    address: str  # path
+    name: Optional[str] = None  # label
+    sampling_period_ms: int
+    dtype: Optional[type] = None
 
 
 class HeaderData(BaseModel):
@@ -58,7 +70,7 @@ class HeaderData(BaseModel):
 
     # signals
     # SignalListHFData, SignalListLFData, SignalListExternalData
-    signals: Dict[str, List[SignalHeader]]
+    signals: Dict[str, List[SignalHeaderHF | SignalHeaderLF]]
 
     # job
     job: Job

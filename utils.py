@@ -1,5 +1,24 @@
 import re
 import hashlib
+import numpy as np
+
+
+def cast_dtype(dtype: str) -> type:
+    """
+    replace string-based data type by its actual numpy type
+    :param dtype: string specifying the data type
+    :return: data type
+    """
+    if dtype.upper() == "INTEGER":
+        return np.int32
+    elif dtype.upper() == "FLOAT":
+        return np.float32
+    elif dtype.upper() == "DOUBLE":
+        return np.double
+    elif dtype.upper() == "STRING":
+        return str
+    else:
+        raise Exception(f"Unrecognized data type {dtype}.")
 
 
 re_signal_name_head = re.compile("[\w\-\.:]+(?=\|\d)", re.ASCII)
