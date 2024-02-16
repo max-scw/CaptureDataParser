@@ -9,14 +9,16 @@ def cast_dtype(dtype: str) -> type:
     :param dtype: string specifying the data type
     :return: data type
     """
-    if dtype.upper() == "INTEGER":
-        return np.int32
-    elif dtype.upper() == "FLOAT":
+    if dtype.lower() == "integer":
+        return int
+    elif dtype.lower() == "float":
         return np.float32
-    elif dtype.upper() == "DOUBLE":
+    elif dtype.lower() == "double":
         return np.double
-    elif dtype.upper() == "STRING":
+    elif dtype.lower() == "string":
         return str
+    elif dtype.lower() == "uint":
+        return int
     else:
         raise Exception(f"Unrecognized data type {dtype}.")
 
