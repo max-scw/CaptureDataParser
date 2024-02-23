@@ -31,7 +31,21 @@ class CapturePayload:
         key = item[1] if len(item) > 1 else None
         as_timeseries = item[2] if len(item) > 2 else False
         rename_signals = item[3] if len(item) > 3 else False
+        return self.get_item(
+            group=group,
+            key=key,
+            as_timeseries=as_timeseries,
+            rename_signals=rename_signals
+        )
 
+    def get_item(
+            self,
+            group: str,
+            key: str = None,
+            as_timeseries: bool = False,
+            rename_signals: bool = False,
+            not_na: bool = False,
+    ) -> pd.DataFrame | pd.Series:
         # query data
         df = self.data[group][key] if key else self.data[group]
 
@@ -53,7 +67,7 @@ class CapturePayload:
                 columns_new.append(col_new)
             # rename columns
             df.columns = columns_new
-        return df
+        return df.dropna(how='all') if not_na else df
 
     def keys(self) -> dict_keys:
         return self.data.keys()
