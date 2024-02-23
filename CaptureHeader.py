@@ -59,14 +59,4 @@ class CaptureHeader:
         return None
 
 
-def group_signal_names(signals: List[SignalHeaderHF] | List[SignalHeaderLF]):
-    group: Dict[str, List[SignalHeaderHF] | List[SignalHeaderLF]] = dict()
-    for sig in signals:
-        string = sig.address
-        name = get_signal_name_head(string)
 
-        if name not in group:
-            group[name] = []
-        group[name] += [sig]
-
-    return group
