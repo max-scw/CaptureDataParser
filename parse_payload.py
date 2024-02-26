@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from dateutil import parser as datetime_parser
+from dateutil.tz import tz
 
 from typing import List, Dict, Tuple, Union, Any
 
@@ -70,6 +71,7 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
     sync time for HFData: CYCLE, HFCallEvent: HFProbeCounter, HFBlockEvent: HFProbeCounter, HFTimestamp: HFProbeCounter
 
     :param data:
+    :param initial_time:
     :return:
     """
     if "HFTimestamp" in data:
@@ -81,6 +83,8 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
 
         xp = data["HFTimestamp"]["HFProbeCounter"]
         yp = data["HFTimestamp"]["Time"].apply(lambda x: to_unix_time(x))
+        # keep info on time zone localization
+        tzinfo = data["HFTimestamp"]["Time"][0].tzinfo
 
         if initial_time is not None:
             xp0 = initial_time.start_counter
@@ -96,7 +100,13 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
 
                 y = np.interp(x, xp, yp)
 
-                data[ky]["Time"] = pd.to_datetime(pd.Series(y, name="Time"))
+                # convert to datetime object
+                time = pd.to_datetime(pd.Series(y, name="Time"), utc=tzinfo == tz.tzutc())
+                if tzinfo != tz.tzutc():
+                    # localize to non-UTC time zone
+                    time.apply(lambda x: x.tz_localize(tzinfo))
+
+                data[ky]["Time"] = time
     return data
 
 
