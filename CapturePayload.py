@@ -1,6 +1,8 @@
+import datetime
+import numpy as np
 import pandas as pd
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Literal
 
 from HeaderData import HeaderData, SignalHeaderHF, SignalHeaderLF, TimeInfo
 from parse_payload import construct_time
@@ -29,39 +31,53 @@ class CapturePayload:
 
         group = item[0]
         key = item[1] if len(item) > 1 else None
-        as_timeseries = item[2] if len(item) > 2 else False
+        index_as = item[2] if len(item) > 2 else None
 
         return self.get_item(
             group=group,
             key=key,
-            as_timeseries=as_timeseries
+            index_as=index_as
         )
 
     def get_item(
             self,
             group: str,
-            key: str = None,
-            as_timeseries: bool = False,
+            key: str | List[str] = None,
+            index_as: Literal["timeseries", "HFProbeCounter", "counter", None] = None,
             not_na: bool = False,
-            limit_to_hfdata: bool = True,
-            limit_to_time: pd.Timestamp = None
+            limit_to: Literal["hfdata"] | int | datetime.datetime = None,
     ) -> pd.DataFrame | pd.Series:
         # query data
         df = self.data[group][key] if key else self.data[group]
 
-        if limit_to_hfdata and ("HFTimestamp" in self.data) and ("HFProbeCounter" in self.data[group]):
+        # limit rows
+        if (
+                isinstance(limit_to, str) and
+                (limit_to.lower() == "hfdata") and
+                ("HFTimestamp" in self.data) and ("HFProbeCounter" in self.data[group])
+        ):
             # get last / maximum probe counter
             hfprobe_counter_max = self.data["HFTimestamp"]["HFProbeCounter"].iloc[-1]
             # crop data
             lg = self.data[group]["HFProbeCounter"] <= hfprobe_counter_max
             df = df[lg]
-
-        if limit_to_time and ("Time" in self.data[group]):
-            lg = self.data[group]["Time"] <= limit_to_time
+        elif (
+                isinstance(limit_to, (int, np.int32, np.int64)) and
+                (("CYCLE" in self.data[group]) or ("HFProbeCounter" in self.data[group]))
+        ):
+            ky = "CYCLE" if "CYCLE" in self.data[group] else "HFProbeCounter"
+            lg = self.data[group][ky] < limit_to
+            df = df[lg[df.index]]
+        elif isinstance(limit_to, datetime.datetime) and ("Time" in self.data[group]):
+            lg = self.data[group]["Time"] < limit_to
             df = df[lg[df.index]]
 
-        if as_timeseries and ("Time" in self.data[group]):
-            df.set_index(self.data[group]["Time"][df.index], inplace=True)
+        # set different index
+        if isinstance(index_as, str):
+            if (index_as.lower() == "timeseries") and ("Time" in self.data[group]):
+                df.set_index(self.data[group]["Time"][df.index], inplace=True)
+            elif (index_as.lower() in ("hfprobecounter", "counter")) and ("HFProbeCounter" in self.data[group]):
+                df.set_index(self.data[group]["HFProbeCounter"][df.index], inplace=True)
 
         return df.dropna(axis="index", how="all") if not_na else df
 
