@@ -1,6 +1,7 @@
 import re
 import hashlib
 import numpy as np
+import pandas as pd
 
 
 def cast_dtype(dtype: str) -> type:
@@ -55,3 +56,14 @@ def hash_list(elements: list) -> str:
     # hash list of hashes
     hash_fnc.update("".join(tmp).encode())
     return hash_fnc.hexdigest()
+
+
+def find_first_changed_row(df: pd.DataFrame):
+    # fill nans
+    df = df.bfill()
+    # consider only numeric columns
+    lg_col = [pd.api.types.is_numeric_dtype(el) for el in df.dtypes]
+    # differences between consecutive rows
+    differences = df.loc[:, lg_col].diff() != 0
+    # first row where differences occur
+    return differences[2:].any(axis=1).idxmax()
