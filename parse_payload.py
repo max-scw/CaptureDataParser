@@ -25,24 +25,33 @@ def parse_payload(
                 # loop through all entrys in this message
                 for row in val:
                     # assert len(row) == len(head)
+
                     if ky == "LFData":
                         assert all(el in row for el in ["address", "value", "value_type", "timestamp"])
                         # get correct header
                         for hd in head:
                             if hd.address == row["address"]:
                                 break
-                        # standard message contents
-                        datapoint = {
-                            hd.address: cast_dtype(row["value_type"])(row["value"]),
-                            "Time": datetime_parser.parse(row["timestamp"])
-                        }
+                        try:
+                            # casting may fail if json-message is brocken
+                            value = cast_dtype(row["value_type"])(row["value"])
+
+                            # standard message contents
+                            datapoint = {
+                                hd.address: value,
+                                "Time": datetime_parser.parse(row["timestamp"])
+                            }
+                        except:
+                            datapoint = None
+
                         # add hf probe counter if available
-                        if "HFProbeCounter" in row:
+                        if (datapoint is not None) and ("HFProbeCounter" in row):
                             datapoint["HFProbeCounter"] = row["HFProbeCounter"]
                     else:  # "HFData"
                         datapoint = {hd.name: hd.dtype(el) for el, hd in zip(row, head)}
 
-                    datapoints.append(datapoint)
+                    if datapoint is not None:
+                        datapoints.append(datapoint)
             elif ky in ["HFCallEvent", "HFBlockEvent", "HFTimestamp"]:
                 # parse timestamp if exists
                 if "Time" in val:
@@ -108,11 +117,3 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
 
                 data[ky]["Time"] = time
     return data
-
-
-if __name__ == "__main__":
-    # TODO: sync data source
-    pass
-
-
-
