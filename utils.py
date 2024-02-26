@@ -58,12 +58,15 @@ def hash_list(elements: list) -> str:
     return hash_fnc.hexdigest()
 
 
-def find_first_changed_row(df: pd.DataFrame):
+def find_changed_rows(df: pd.DataFrame, ignore_first_rows: int = 0) -> list:
     # fill nans
     df = df.bfill()
     # consider only numeric columns
     lg_col = [pd.api.types.is_numeric_dtype(el) for el in df.dtypes]
     # differences between consecutive rows
     differences = df.loc[:, lg_col].diff() != 0
-    # first row where differences occur
-    return differences[2:].any(axis=1).idxmax()
+    # # first row where differences occur
+    # differences[2:].any(axis=1).idxmax()
+    # Find indices of rows where at least one True occurs
+    lg = differences[ignore_first_rows:].any(axis=1)
+    return list(lg[lg].index)
