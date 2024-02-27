@@ -3,6 +3,7 @@ import hashlib
 import numpy as np
 import pandas as pd
 
+from HeaderData import SignalHeaderHF
 
 def cast_dtype(dtype: str) -> type:
     """
@@ -24,7 +25,8 @@ def cast_dtype(dtype: str) -> type:
         raise Exception(f"Unrecognized data type {dtype}.")
 
 
-re_signal_name_head = re.compile("[\w\-\.:]+(?=\|\d)", re.ASCII)
+re_signal_name_head = re.compile("[\w\-\.:]+(?=\|(\d|[a-cA-Cx-zX-ZsS]))", re.ASCII)
+re_signal_axis = re.compile("([a-cx-z]|sp)\d+", re.IGNORECASE | re.ASCII)
 
 
 def get_signal_name_head(name: str) -> str:
@@ -33,6 +35,17 @@ def get_signal_name_head(name: str) -> str:
         return name
     else:
         return m.group()
+
+
+def rename_signal(head: SignalHeaderHF) -> str:
+    # check axis is an expected machine tool axis (X, Y, Z, A, B, C, SP
+    m = re_signal_axis.match(head.axis)
+    if m is not None:
+        axis = head.axis
+        name = get_signal_name_head(head.name)
+        return f"{name}|{axis}"
+    else:
+        return head.name
 
 
 def hash_list(elements: list) -> str:

@@ -7,12 +7,13 @@ from dateutil.tz import tz
 from typing import List, Dict, Tuple, Union, Any
 
 from HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
-from utils import cast_dtype
+from utils import cast_dtype, rename_signal
 
 
 def parse_payload(
         payload: List[Dict[str, List[List[Union[int, float]]]]],
-        signals_header: Dict[str, List[SignalHeaderHF | SignalHeaderLF]]
+        signals_header: Dict[str, List[SignalHeaderHF | SignalHeaderLF]],
+        rename_hfdata: bool = False
 ) -> Dict[str, pd.DataFrame]:
     data: Dict[str, List[Dict[str, Any]]] = dict()
     for msg in payload:
@@ -47,6 +48,8 @@ def parse_payload(
                         # add hf probe counter if available
                         if (datapoint is not None) and ("HFProbeCounter" in row):
                             datapoint["HFProbeCounter"] = row["HFProbeCounter"]
+                    elif ky == "HFData" and rename_hfdata:
+                        datapoint = {rename_signal(hd): hd.dtype(el) for el, hd in zip(row, head)}
                     else:  # "HFData"
                         datapoint = {hd.name: hd.dtype(el) for el, hd in zip(row, head)}
 
@@ -117,3 +120,6 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
 
                 data[ky]["Time"] = time
     return data
+
+
+
