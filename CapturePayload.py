@@ -99,15 +99,11 @@ class CapturePayload:
             self,
             group: str,
             key: str,
-            as_timeseries: bool = False,
+            **kwargs
     ) -> pd.DataFrame:
         # query data
         keys = self._grouped_signals[group][key]
-        df = self.data[group][keys]
-
-        if as_timeseries and "Time" in self.data[group]:
-            df.set_index(self.data[group]["Time"], inplace=True)
-
+        df = self.get_item(group, keys, **kwargs)
         return df
 
     def hash_g_code(self) -> str:
