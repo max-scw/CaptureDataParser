@@ -77,9 +77,11 @@ def find_changed_rows(df: pd.DataFrame, ignore_first_rows: int = 0) -> list:
     # consider only numeric columns
     lg_col = [pd.api.types.is_numeric_dtype(el) for el in df.dtypes]
     # differences between consecutive rows
-    differences = df.loc[:, lg_col].diff() != 0
-    # # first row where differences occur
-    # differences[2:].any(axis=1).idxmax()
+    differences = df.loc[:, lg_col].diff()
+    # only not nan columns
+    lg_col = differences.notna().any()
+    lg_diff = differences.loc[:, lg_col] != 0
+
     # Find indices of rows where at least one True occurs
-    lg = differences[ignore_first_rows:].any(axis=1)
+    lg = lg_diff[ignore_first_rows:].any(axis=1)
     return list(lg[lg].index)
