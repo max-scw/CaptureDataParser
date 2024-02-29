@@ -6,8 +6,8 @@ from dateutil.tz import tz
 
 from typing import List, Dict, Tuple, Union, Any
 
-from .HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
-from .utils import cast_dtype, rename_signal
+from CaptureDataParser.HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
+from CaptureDataParser.utils import cast_dtype, rename_signal
 
 
 def parse_payload(
