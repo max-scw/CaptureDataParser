@@ -13,12 +13,17 @@ from utils import cast_dtype, rename_signal
 def parse_payload(
         payload: List[Dict[str, List[List[Union[int, float]]]]],
         signals_header: Dict[str, List[SignalHeaderHF | SignalHeaderLF]],
-        rename_hfdata: bool = False
+        rename_hfdata: bool = False,
+        components: List[str] = None
 ) -> Dict[str, pd.DataFrame]:
     data: Dict[str, List[Dict[str, Any]]] = dict()
     for msg in payload:
         for ky, val in msg.items():
             datapoints: List[Dict[str, Any]] = []
+
+            if (components is not None) and (ky not in components):
+                # shortcut
+                continue
 
             if ky in signals_header:
                 head = signals_header[ky]

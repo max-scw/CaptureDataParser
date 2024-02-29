@@ -5,6 +5,7 @@ import pandas as pd
 
 from HeaderData import SignalHeaderHF
 
+
 def cast_dtype(dtype: str) -> type:
     """
     replace string-based data type by its actual numpy type
