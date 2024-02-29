@@ -3,4 +3,5 @@ matplotlib>=3.8.1
 pandas>=2.0.0
 pydantic>=2.6.1
 python-dateutil>=2.5.0
+setproctitle>=1.1
 tqdm>=4.26.0
