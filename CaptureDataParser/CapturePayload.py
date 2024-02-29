@@ -4,7 +4,7 @@ import pandas as pd
 
 from typing import Dict, List, Tuple, Union, Literal
 
-from HeaderData import HeaderData, SignalHeaderHF, SignalHeaderLF, TimeInfo
+from HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
 from parse_payload import construct_time
 from utils import get_signal_name_head, hash_list
 
