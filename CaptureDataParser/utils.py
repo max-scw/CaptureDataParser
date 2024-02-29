@@ -3,7 +3,7 @@ import hashlib
 import numpy as np
 import pandas as pd
 
-from HeaderData import SignalHeaderHF
+from .HeaderData import SignalHeaderHF
 
 
 def cast_dtype(dtype: str) -> type:

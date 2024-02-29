@@ -4,7 +4,7 @@ import json
 from typing import List, Dict, Literal
 import warnings
 
-from HeaderData import (
+from .HeaderData import (
     HeaderData,
     Version,
     Machine,

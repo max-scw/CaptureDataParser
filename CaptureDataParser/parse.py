@@ -1,9 +1,9 @@
 from pathlib import Path
 import json
 
-from parse_header import parse_header
-from parse_payload import parse_payload
-from CapturePayload import CapturePayload
+from .parse_header import parse_header
+from .parse_payload import parse_payload
+from .CapturePayload import CapturePayload
 
 from typing import Union
 

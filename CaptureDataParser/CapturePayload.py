@@ -4,9 +4,9 @@ import pandas as pd
 
 from typing import Dict, List, Tuple, Union, Literal
 
-from HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
-from parse_payload import construct_time
-from utils import get_signal_name_head, hash_list
+from .HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
+from .parse_payload import construct_time
+from .utils import get_signal_name_head, hash_list
 
 # workaround to construct the type
 dict_keys = type({}.keys())
