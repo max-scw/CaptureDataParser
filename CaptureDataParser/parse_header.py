@@ -4,7 +4,7 @@ import json
 from typing import List, Dict, Literal
 import warnings
 
-from .HeaderData import (
+from CaptureDataParser.HeaderData import (
     HeaderData,
     Version,
     Machine,
@@ -13,7 +13,7 @@ from .HeaderData import (
     SignalHeaderHF,
     SignalHeaderLF
 )
-from utils import cast_dtype
+from CaptureDataParser.utils import cast_dtype
 
 
 def parse_signals(signals: List[Dict[str, str]], mode: Literal["hf", "lf"]) -> List[SignalHeaderHF] | List[SignalHeaderLF]:
