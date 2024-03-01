@@ -69,9 +69,10 @@ if __name__ == "__main__":
     ]
 
     info = []
-    files = list(folder_source.glob("**/*.json"))
-    for i in tqdm(range(opt.start_index, len(files))):
-        fl = files[i]
+    for i, fl in enumerate(tqdm(list(folder_source.glob("**/*.json")))):
+        # skip first files
+        if i < opt.start_index:
+            continue
 
         data = parse(fl, rename_hfdata=True)
 
