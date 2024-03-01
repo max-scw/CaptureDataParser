@@ -18,29 +18,27 @@ from setproctitle import setproctitle
 def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFrame, int):
     index = 'HFProbeCounter'
 
-    if keys is None:
-        keys = [
-            '/Channel/State/actToolIdent',
-            '/Channel/State/actTNumber',
-            '/Channel/State/actToolLength1',
-            '/Channel/State/actToolLength2',
-            '/Channel/State/actToolRadius',
-        ]
-    tool = payload.get_item("LFData", keys + [index], not_na=True).ffill().bfill().drop_duplicates()
-
-    keys_tool = [el for el in tool.columns if el != index]
-    # ignore rows where both lengths and the radius is 0
     keys_geometry = [
         '/Channel/State/actToolLength1',
         '/Channel/State/actToolLength2',
         '/Channel/State/actToolRadius'
     ]
+    if keys is None:
+        keys = keys_geometry + [
+            '/Channel/State/actToolIdent',
+            '/Channel/State/actTNumber'
+        ]
+    tool = payload.get_item("LFData", keys + [index], not_na=True).ffill().bfill().drop_duplicates()
+
+    keys_tool = [el for el in tool.columns if el != index]
+    # ignore rows where both lengths and the radius is 0
+
     tool[keys_geometry] = tool[keys_geometry].replace(to_replace=0, value=np.nan).ffill()
-    # TODO: merge by index
+
     # find first row where tool keys change
     idxs = find_changed_rows(tool[keys_tool])
     if len(idxs) > 1:
-        idx_ = np.unique(idxs)[1] - 1
+        idx_ = np.unique(idxs)[0]
     else:
         idx_ = tool.index[-1]
 

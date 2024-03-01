@@ -31,6 +31,11 @@ re_signal_axis = re.compile("([a-cx-z]|sp)\d+", re.IGNORECASE | re.ASCII)
 
 
 def get_signal_name_head(name: str) -> str:
+    """
+    extracts main part (aka. "head") of a signal name, i.e. everything before ...|<number> which indicates the axis
+    :param name:
+    :return: name head or full name
+    """
     m = re_signal_name_head.match(name)
     if m is None:
         return name
@@ -39,6 +44,11 @@ def get_signal_name_head(name: str) -> str:
 
 
 def rename_signal(head: SignalHeaderHF) -> str:
+    """
+    renames the enumerated axes by their corresponding name (i.e. <name head>|<axis number> => <name head>|<axis name>
+    :param head:
+    :return: signal name
+    """
     # check axis is an expected machine tool axis (X, Y, Z, A, B, C, SP
     m = re_signal_axis.match(head.axis)
     if m is not None:
@@ -72,17 +82,32 @@ def hash_list(elements: list) -> str:
     return hash_fnc.hexdigest()
 
 
-def find_changed_rows(df: pd.DataFrame, ignore_first_rows: int = 0) -> list:
+def find_changed_rows(df: pd.DataFrame) -> list:
+    """
+    finds rows that differ from the next row in a dataframe
+    :param df: table of which the rows should be checked
+    :return: list of indices where the content differs from the next row in the table
+    """
     # fill nans
     df = df.bfill()
     # consider only numeric columns
     lg_col = [pd.api.types.is_numeric_dtype(el) for el in df.dtypes]
     # differences between consecutive rows
-    differences = df.loc[:, lg_col].diff()
+    diff_num = df.loc[:, lg_col].diff()
     # only not nan columns
-    lg_col = differences.notna().any()
-    lg_diff = differences.loc[:, lg_col] != 0
+    lg_nan = diff_num.notna().any()
+    lg_diff = diff_num.loc[:, lg_nan] != 0
 
-    # Find indices of rows where at least one True occurs
-    lg = lg_diff[ignore_first_rows:].any(axis=1)
+    # not numeric columns
+    lg_col_not = [not el for el in lg_col]
+    # compare "manually", ignoring the index
+    diff_str_ = df.iloc[1:, lg_col_not].astype(str).to_numpy() != df.iloc[:-1, lg_col_not].astype(str).to_numpy()
+    # construct DataFrame
+    diff_str = pd.DataFrame(diff_str_, columns=df.columns[lg_col_not], index=df.index[1:])
+
+    # concatenate
+    differences = pd.concat((lg_diff, diff_str), axis=1)
+
+    # Find indices of rows where at least one True occurs (first row is NaN due to diff-operation)
+    lg = differences[1:].any(axis=1)
     return list(lg[lg].index)
