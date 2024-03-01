@@ -26,9 +26,6 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
 
-    # opt.source = Path("./data/recordings")
-    # opt.destination = Path("./data/extracted_Recordings")
-
     if opt.process_title:
         setproctitle(opt.process_title)
 
