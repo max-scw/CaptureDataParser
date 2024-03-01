@@ -54,8 +54,6 @@ if __name__ == "__main__":
     parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
 
     opt = parser.parse_args()
-    opt.source = r"C:\Users\schwmax\Downloads\RecordingsPittler_extracted"
-    opt.destination = r"C:\Users\schwmax\Downloads\RecordingsPittler_export"
 
     if opt.process_title:
         setproctitle(opt.process_title)
