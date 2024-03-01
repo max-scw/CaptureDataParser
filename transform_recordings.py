@@ -6,8 +6,7 @@ from tqdm import tqdm
 
 from typing import List
 
-from CaptureDataParser.CapturePayload import CapturePayload
-from CaptureDataParser.parse import parse
+from CaptureDataParser import CapturePayload, parse
 from CaptureDataParser.utils import find_changed_rows
 
 
@@ -51,6 +50,7 @@ if __name__ == "__main__":
     parser.add_argument("--source", type=str, help='Directory where zipped recordings are stored')
     parser.add_argument("--destination", type=str, help='Directory where extracted recordings should be placed to')
     parser.add_argument('--process-title', type=str, default=None, help='Names the process')
+    parser.add_argument('--start-index', type=int, default=0, help='ith file to start from')
 
     opt = parser.parse_args()
 
@@ -69,7 +69,9 @@ if __name__ == "__main__":
     ]
 
     info = []
-    for i, fl in enumerate(tqdm(list(folder_source.glob("**/*.json")))):
+    files = list(folder_source.glob("**/*.json"))
+    for i in tqdm(range(opt.start_index, len(files))):
+        fl = files[i]
 
         data = parse(fl, rename_hfdata=True)
 
