@@ -69,6 +69,7 @@ if __name__ == "__main__":
     ]
 
     info = []
+    k = 0
     for i, fl in enumerate(tqdm(list(folder_source.glob("**/*.json")))):
         # skip first files
         if i < opt.start_index:
@@ -99,6 +100,8 @@ if __name__ == "__main__":
             index=False
         )
 
+        k += 1
+
     df = pd.DataFrame(info)
     # sort by recording date
     df.sort_values(by="date", inplace=True, ignore_index=True)
@@ -114,4 +117,4 @@ if __name__ == "__main__":
     df.to_csv(info_file, header=True, index=False)
 
     find_changed_rows(df[keys_toolinfo])
-    print("done.")
+    print(f"Exported {k} files + {info_file} to {opt.destination}.")
