@@ -47,12 +47,15 @@ def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFr
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=str, help='Directory where zipped recordings are stored')
-    parser.add_argument("--destination", type=str, help='Directory where extracted recordings should be placed to')
-    parser.add_argument('--process-title', type=str, default=None, help='Names the process')
-    parser.add_argument('--start-index', type=int, default=0, help='ith file to start from')
+    parser.add_argument("--source", type=str, help="Directory where zipped recordings are stored")
+    parser.add_argument("--destination", type=str, help="Directory where extracted recordings should be placed to")
+    parser.add_argument("--process-title", type=str, default=None, help="Names the process")
+    parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
+    parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
 
     opt = parser.parse_args()
+    opt.source = r"C:\Users\schwmax\Downloads\RecordingsPittler_extracted"
+    opt.destination = r"C:\Users\schwmax\Downloads\RecordingsPittler_export"
 
     if opt.process_title:
         setproctitle(opt.process_title)
@@ -91,14 +94,15 @@ if __name__ == "__main__":
         })
 
         # export HFData
-        columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
-        columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
-        filename_export = folder_export / fl.with_suffix(".csv").name
-        data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
-            filename_export,
-            header=True,
-            index=False
-        )
+        if not opt.only_info:
+            columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
+            columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
+            filename_export = folder_export / fl.with_suffix(".csv").name
+            data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
+                filename_export,
+                header=True,
+                index=False
+            )
 
         k += 1
 
