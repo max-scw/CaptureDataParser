@@ -86,7 +86,7 @@ if __name__ == "__main__":
         try:
             data = parse(fl, rename_hfdata=True)
         except Exception as ex:
-            raise f"Failed to parse {fl.as_posix()} with the exception: {ex}"
+            raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
 
         id = data.hash_g_code()
         # extract tool information and limit signals to this exact tool
