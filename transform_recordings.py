@@ -52,6 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--process-title", type=str, default=None, help="Names the process")
     parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
     parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
+    parser.add_argument("--no-overwrote", action="store_true", help="Do not not overwrite existing files")
 
     opt = parser.parse_args()
 
@@ -76,6 +77,12 @@ if __name__ == "__main__":
         if i < opt.start_index:
             continue
 
+        # construct export file name
+        filename_export = folder_export / fl.with_suffix(".csv").name
+        # skip if file exists and should not be overwritten
+        if filename_export.exists() and opt.no_overwrite:
+            continue
+
         data = parse(fl, rename_hfdata=True)
 
         id = data.hash_g_code()
@@ -95,7 +102,7 @@ if __name__ == "__main__":
         if not opt.only_info:
             columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
             columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
-            filename_export = folder_export / fl.with_suffix(".csv").name
+
             data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
                 filename_export,
                 header=True,
