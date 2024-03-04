@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--process-title", type=str, default=None, help="Names the process")
     parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
     parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
-    parser.add_argument("--no-overwrote", action="store_true", help="Do not not overwrite existing files")
+    parser.add_argument("--no-overwrite", action="store_true", help="Do not not overwrite existing files")
 
     opt = parser.parse_args()
 
