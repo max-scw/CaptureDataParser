@@ -70,9 +70,6 @@ if __name__ == "__main__":
         '/Channel/State/actToolRadius'
     ]
 
-    info = []
-    k = 0
-
     # find files to parse
     files = []
     for i, fl in enumerate(list(folder_source.glob("**/*.json"))):
@@ -86,45 +83,46 @@ if __name__ == "__main__":
         if (not filename_export.exists()) or (not opt.no_overwrite):
             files.append(fl)
 
-    try:
-        for i, fl in enumerate(tqdm(files)):
-            # parse file
-            try:
-                data = parse(fl, rename_hfdata=True)
-            except Exception as ex:
-                raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
+    info = []
+    k = 0
+    for i, fl in enumerate(tqdm(files)):
+        # parse file
+        try:
+            data = parse(fl, rename_hfdata=True)
+        except Exception as ex:
+            raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
 
-            id = data.hash_g_code()
-            # extract tool information and limit signals to this exact tool
-            tool_info, lim = get_tool_info(data, keys_toolinfo)
+        id = data.hash_g_code()
+        # extract tool information and limit signals to this exact tool
+        tool_info, lim = get_tool_info(data, keys_toolinfo)
 
-            n_rows, n_cols = data.get_item("HFData", limit_to=lim).shape
-            info.append({
-                "filename": fl.name,
-                "n_rows": n_rows, "n_cols": n_cols,
-                "date": data["HFData", "Time"][0],
-                **tool_info,
-                "G code hash": id,
-            })
+        n_rows, n_cols = data.get_item("HFData", limit_to=lim).shape
+        info.append({
+            "filename": fl.name,
+            "n_rows": n_rows, "n_cols": n_cols,
+            "date": data["HFData", "Time"][0],
+            **tool_info,
+            "G code hash": id,
+        })
 
-            # export HFData
-            if not opt.only_info:
-                columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
-                columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
+        # export HFData
+        if not opt.only_info:
+            columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
+            columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
 
-                # construct export file name
-                filename_export = folder_export / fl.with_suffix(".csv").name
-                # export to CSV
-                data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
-                    filename_export,
-                    header=True,
-                    index=False
-                )
+            # construct export file name
+            filename_export = folder_export / fl.with_suffix(".csv").name
+            # export to CSV
+            data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
+                filename_export,
+                header=True,
+                index=False
+            )
 
-            k += 1
-    except Exception as ex:
-        raise ex
+        k += 1
+    print(f"Done transforming {k} recordings.")
 
+    # create DataFrame
     df = pd.DataFrame(info)
     # sort by recording date
     df.sort_values(by="date", inplace=True, ignore_index=True)
@@ -135,7 +133,7 @@ if __name__ == "__main__":
         if info_file.exists():
             info_file = info_file.with_stem(f"info_{i}")
         else:
-             break
+            break
         i += 1
     df.to_csv(info_file, header=True, index=False)
 
