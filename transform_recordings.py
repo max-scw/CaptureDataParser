@@ -120,24 +120,20 @@ if __name__ == "__main__":
             )
 
         k += 1
-    print(f"Done transforming {k} recordings.")
 
     # create DataFrame
     df = pd.DataFrame(info)
-    print(f"Table created ({df.shape}).")
     # sort by recording date
     df.sort_values(by="date", inplace=True, ignore_index=True)
 
-    print(f"Unique filename ...")
     info_file = folder_export / "info.csv"
+    i = 1
     while True:
-        i = 1
         if info_file.exists():
             info_file = info_file.with_stem(f"info_{i}")
         else:
             break
         i += 1
-    print(f"Writing info file {info_file.as_posix()}...")
     df.to_csv(info_file, header=True, index=False)
 
     find_changed_rows(df[keys_toolinfo])
