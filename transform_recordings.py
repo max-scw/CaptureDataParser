@@ -124,20 +124,20 @@ if __name__ == "__main__":
             k += 1
     except Exception as ex:
         raise ex
-    finally:
-        df = pd.DataFrame(info)
-        # sort by recording date
-        df.sort_values(by="date", inplace=True, ignore_index=True)
 
-        info_file = folder_export / "info.csv"
-        while True:
-            i = 1
-            if info_file.exists():
-                info_file = info_file.with_stem(f"info_{i}")
-            else:
-                break
-            i += 1
-        df.to_csv(info_file, header=True, index=False)
+    df = pd.DataFrame(info)
+    # sort by recording date
+    df.sort_values(by="date", inplace=True, ignore_index=True)
 
-        find_changed_rows(df[keys_toolinfo])
-        print(f"Exported {k} files + {info_file} to {opt.destination}.")
+    info_file = folder_export / "info.csv"
+    while True:
+        i = 1
+        if info_file.exists():
+            info_file = info_file.with_stem(f"info_{i}")
+        else:
+             break
+        i += 1
+    df.to_csv(info_file, header=True, index=False)
+
+    find_changed_rows(df[keys_toolinfo])
+    print(f"Exported {k} files + {info_file} to {opt.destination}.")
