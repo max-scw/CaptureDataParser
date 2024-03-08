@@ -72,7 +72,10 @@ if __name__ == "__main__":
 
     info = []
     k = 0
-    for i, fl in enumerate(tqdm(list(folder_source.glob("**/*.json")))):
+
+    # find files to parse
+    files = []
+    for i, fl in enumerate(list(folder_source.glob("**/*.json"))):
         # skip first files
         if i < opt.start_index:
             continue
@@ -80,53 +83,61 @@ if __name__ == "__main__":
         # construct export file name
         filename_export = folder_export / fl.with_suffix(".csv").name
         # skip if file exists and should not be overwritten
-        if filename_export.exists() and opt.no_overwrite:
-            continue
+        if (not filename_export.exists()) or (not opt.no_overwrite):
+            files.append(fl)
 
-        try:
-            data = parse(fl, rename_hfdata=True)
-        except Exception as ex:
-            raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
+    try:
+        for i, fl in enumerate(tqdm(files)):
+            # parse file
+            try:
+                data = parse(fl, rename_hfdata=True)
+            except Exception as ex:
+                raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
 
-        id = data.hash_g_code()
-        # extract tool information and limit signals to this exact tool
-        tool_info, lim = get_tool_info(data, keys_toolinfo)
+            id = data.hash_g_code()
+            # extract tool information and limit signals to this exact tool
+            tool_info, lim = get_tool_info(data, keys_toolinfo)
 
-        n_rows, n_cols = data.get_item("HFData", limit_to=lim).shape
-        info.append({
-            "filename": fl.name,
-            "n_rows": n_rows, "n_cols": n_cols,
-            "date": data["HFData", "Time"][0],
-            **tool_info,
-            "G code hash": id,
-        })
+            n_rows, n_cols = data.get_item("HFData", limit_to=lim).shape
+            info.append({
+                "filename": fl.name,
+                "n_rows": n_rows, "n_cols": n_cols,
+                "date": data["HFData", "Time"][0],
+                **tool_info,
+                "G code hash": id,
+            })
 
-        # export HFData
-        if not opt.only_info:
-            columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
-            columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
+            # export HFData
+            if not opt.only_info:
+                columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
+                columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
 
-            data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
-                filename_export,
-                header=True,
-                index=False
-            )
+                # construct export file name
+                filename_export = folder_export / fl.with_suffix(".csv").name
+                # export to CSV
+                data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
+                    filename_export,
+                    header=True,
+                    index=False
+                )
 
-        k += 1
+            k += 1
+    except Exception as ex:
+        raise ex
+    finally:
+        df = pd.DataFrame(info)
+        # sort by recording date
+        df.sort_values(by="date", inplace=True, ignore_index=True)
 
-    df = pd.DataFrame(info)
-    # sort by recording date
-    df.sort_values(by="date", inplace=True, ignore_index=True)
+        info_file = folder_export / "info.csv"
+        while True:
+            i = 1
+            if info_file.exists():
+                info_file = info_file.with_stem(f"info_{i}")
+            else:
+                break
+            i += 1
+        df.to_csv(info_file, header=True, index=False)
 
-    info_file = folder_export / "info.csv"
-    while True:
-        i = 1
-        if info_file.exists():
-            info_file = info_file.with_stem(f"info_{i}")
-        else:
-            break
-        i += 1
-    df.to_csv(info_file, header=True, index=False)
-
-    find_changed_rows(df[keys_toolinfo])
-    print(f"Exported {k} files + {info_file} to {opt.destination}.")
+        find_changed_rows(df[keys_toolinfo])
+        print(f"Exported {k} files + {info_file} to {opt.destination}.")
