@@ -124,9 +124,11 @@ if __name__ == "__main__":
 
     # create DataFrame
     df = pd.DataFrame(info)
+    print(f"Table created ({df.shape}).")
     # sort by recording date
     df.sort_values(by="date", inplace=True, ignore_index=True)
 
+    print(f"Unique filename ...")
     info_file = folder_export / "info.csv"
     while True:
         i = 1
@@ -135,6 +137,7 @@ if __name__ == "__main__":
         else:
             break
         i += 1
+    print(f"Writing info file {info_file.as_posix()}...")
     df.to_csv(info_file, header=True, index=False)
 
     find_changed_rows(df[keys_toolinfo])
