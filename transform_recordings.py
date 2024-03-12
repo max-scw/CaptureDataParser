@@ -53,9 +53,9 @@ if __name__ == "__main__":
     parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
     parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
     parser.add_argument("--no-overwrite", action="store_true", help="Do not not overwrite existing files")
-    parser.add_argument("--compress", type=str, default="infer",
+    parser.add_argument("--compression", type=str, default=None,
                         help="Compresses exported file "
-                             "(.gz, .bz2, .zip, .xz, .zst, .tar, .tar.gz, .tar.xz or .tar.bz2).")
+                             "('bz2', 'gzip', 'tar', 'xz', 'zip', 'zstd').")
 
     opt = parser.parse_args()
 
@@ -114,13 +114,13 @@ if __name__ == "__main__":
             columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
 
             # construct export file name
-            filename_export = folder_export / fl.with_suffix(".csv").name
+            filename_export = folder_export / fl.with_suffix(f".{opt.compression}" if opt.compression else ".csv").name
             # export to CSV
             data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
                 filename_export,
                 header=True,
                 index=False,
-                compression=opt.compress
+                compression=opt.compression
             )
 
         k += 1
