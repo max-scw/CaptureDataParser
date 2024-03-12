@@ -87,6 +87,13 @@ class CapturePayload:
     def groups(self) -> dict_keys:
         return self.keys()
 
+    def group_signals(self, key: str = None) -> Union[Dict[str, List[str]], Dict[str, Dict[str, List[str]]]]:
+        if key in self._grouped_signals:
+            return self._grouped_signals[key]
+        else:
+            return self._grouped_signals
+
+
     @staticmethod
     def _group_signals(data: Dict[str, pd.DataFrame]):
         # group signals
