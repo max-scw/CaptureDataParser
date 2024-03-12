@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+from zipfile import ZipFile
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -53,6 +53,9 @@ if __name__ == "__main__":
     parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
     parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
     parser.add_argument("--no-overwrite", action="store_true", help="Do not not overwrite existing files")
+    parser.add_argument("--compress", type=str, default="infer",
+                        help="Compresses exported file "
+                             "(.gz, .bz2, .zip, .xz, .zst, .tar, .tar.gz, .tar.xz or .tar.bz2).")
 
     opt = parser.parse_args()
 
@@ -116,7 +119,8 @@ if __name__ == "__main__":
             data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
                 filename_export,
                 header=True,
-                index=False
+                index=False,
+                compression=opt.compress
             )
 
         k += 1
@@ -127,7 +131,7 @@ if __name__ == "__main__":
     df.sort_values(by="date", inplace=True, ignore_index=True)
 
     info_file = folder_export / "info.csv"
-    i = 1
+    i = 0
     while True:
         if info_file.exists():
             info_file = info_file.with_stem(f"info_{i}")
