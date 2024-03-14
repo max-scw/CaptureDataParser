@@ -75,13 +75,14 @@ if __name__ == "__main__":
 
     # find files to parse
     files = []
+    suffix_export_file = f".{opt.crompression}" if opt.compression is not None else ".csv"
     for i, fl in enumerate(list(folder_source.glob("**/*.json"))):
         # skip first files
         if i < opt.start_index:
             continue
 
         # construct export file name
-        filename_export = folder_export / fl.with_suffix(".csv").name
+        filename_export = folder_export / fl.with_suffix(suffix_export_file).name
         # skip if file exists and should not be overwritten
         if (not filename_export.exists()) or (not opt.no_overwrite):
             files.append(fl)
@@ -114,7 +115,7 @@ if __name__ == "__main__":
             columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
 
             # construct export file name
-            filename_export = folder_export / fl.with_suffix(f".{opt.compression}" if opt.compression else ".csv").name
+            filename_export = folder_export / fl.with_suffix(suffix_export_file).name
             # export to CSV
             data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
                 filename_export,
