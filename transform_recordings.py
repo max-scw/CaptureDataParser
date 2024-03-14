@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     # find files to parse
     files = []
-    suffix_export_file = f".{opt.crompression}" if opt.compression is not None else ".csv"
+    suffix_export_file = f".{opt.compression}" if opt.compression is not None else ".csv"
     for i, fl in enumerate(list(folder_source.glob("**/*.json"))):
         # skip first files
         if i < opt.start_index:
