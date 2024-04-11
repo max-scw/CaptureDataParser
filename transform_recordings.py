@@ -39,7 +39,7 @@ def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFr
     if len(idxs) > 1:
         idx_ = np.unique(idxs)[0]
     else:
-        idx_ = tool.index[-1]
+        idx_ = tool.index[-1] # TODO: check indexing
 
     # get tool info (from last row)
     return tool.loc[idx_, keys_tool], tool.loc[idx_, index]
@@ -96,9 +96,14 @@ if __name__ == "__main__":
         except Exception as ex:
             raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
 
+        # create unique hash from G code
         id = data.hash_g_code()
-        # extract tool information and limit signals to this exact tool
-        tool_info, lim = get_tool_info(data, keys_toolinfo)
+
+        try:
+            # extract tool information and limit signals to this exact tool
+            tool_info, lim = get_tool_info(data, keys_toolinfo)
+        except Exception as ex:
+            raise Exception(f"Failed to get tool info {fl.as_posix()} with the exception: {ex}")
 
         n_rows, n_cols = data.get_item("HFData", limit_to=lim).shape
         info.append({
