@@ -2,6 +2,7 @@ import re
 import hashlib
 import numpy as np
 import pandas as pd
+import re
 
 from CaptureDataParser.HeaderData import SignalHeaderHF
 
@@ -111,3 +112,12 @@ def find_changed_rows(df: pd.DataFrame) -> list:
     # Find indices of rows where at least one True occurs (first row is NaN due to diff-operation)
     lg = differences[1:].any(axis=1)
     return list(lg[lg].index)
+
+
+def check_key_pattern(columns: list, key_pattern: str):
+    re_ky = re.compile(key_pattern)
+    for col in columns:
+        m = re_ky.match(col)
+        if m:
+            return col
+    return None

@@ -7,7 +7,7 @@ from tqdm import tqdm
 from typing import List
 
 from CaptureDataParser import CapturePayload, parse
-from CaptureDataParser.utils import find_changed_rows
+from CaptureDataParser.utils import find_changed_rows, check_key_pattern
 
 
 import argparse
@@ -31,6 +31,9 @@ def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFr
 
     keys_tool = [el for el in tool.columns if el != index]
     # ignore rows where both lengths and the radius is 0
+
+    # update keys:
+    keys_geometry = [check_key_pattern(tool.columns, ky) for ky in keys_geometry]
 
     tool[keys_geometry] = tool[keys_geometry].replace(to_replace=0, value=np.nan).ffill()
 
@@ -72,6 +75,7 @@ if __name__ == "__main__":
         '/Channel/State/actToolLength2',
         '/Channel/State/actToolRadius'
     ]
+    # this is a pattern. May continue with an index such as: [u1,1]
 
     # find files to parse
     files = []

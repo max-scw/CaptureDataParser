@@ -2,11 +2,12 @@ import datetime
 import numpy as np
 import pandas as pd
 
+
 from typing import Dict, List, Tuple, Union, Literal
 
 from CaptureDataParser.HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
 from CaptureDataParser.parse_payload import construct_time
-from CaptureDataParser.utils import get_signal_name_head, hash_list
+from CaptureDataParser.utils import get_signal_name_head, hash_list, check_key_pattern
 
 # workaround to construct the type
 dict_keys = type({}.keys())
@@ -39,6 +40,16 @@ class CapturePayload:
             index_as=index_as
         )
 
+    def _check_key(self, group, key):
+        if key not in self.data[group]:
+            # assume regex pattern
+            new_ky = check_key_pattern(self.data[group].columns, key)
+            if new_ky:
+                key = new_ky
+            else:
+                raise KeyError(f"Key {key} not in self.data[{group}].")
+        return key
+
     def get_item(
             self,
             group: str,
@@ -48,7 +59,18 @@ class CapturePayload:
             limit_to: Literal["hfdata"] | int | datetime.datetime = None,
     ) -> pd.DataFrame | pd.Series:
         # query data
-        df = self.data[group][key] if key else self.data[group]
+        if key:
+            if isinstance(key, (list, tuple)):
+                # assume regex pattern
+                keys = []
+                for ky in key:
+                    keys.append(self._check_key(group, ky))
+            else:
+                keys = self._check_key(group, key)
+
+            df = self.data[group][keys]
+        else:
+            df = self.data[group]
 
         # limit rows
         if (
