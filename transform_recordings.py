@@ -1,5 +1,5 @@
+import warnings
 from pathlib import Path
-from zipfile import ZipFile
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -42,7 +42,7 @@ def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFr
     if len(idxs) > 1:
         idx_ = np.unique(idxs)[0]
     else:
-        idx_ = tool.index[-1] # TODO: check indexing
+        idx_ = tool.index[-1]  # TODO: check indexing
 
     # get tool info (from last row)
     return tool.loc[idx_, keys_tool], tool.loc[idx_, index]
@@ -100,8 +100,15 @@ if __name__ == "__main__":
         except Exception as ex:
             raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
 
-        # create unique hash from G code
-        id = data.hash_g_code()
+        try:
+            # create unique hash from G code
+            id = data.hash_g_code()
+        except Exception as ex:
+            warnings.warn(
+                f"Failed to hash G-code of {fl.as_posix()} with the exception: {ex}"
+                "\nSkipping this file."
+            )
+            continue
 
         try:
             # extract tool information and limit signals to this exact tool
@@ -120,7 +127,7 @@ if __name__ == "__main__":
 
         # export HFData
         if not opt.only_info:
-            columns_to_exclude = ["CYCLE", "HFProbeCounter"] #+ ["Time"]
+            columns_to_exclude = ["CYCLE", "HFProbeCounter"]
             columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
 
             # construct export file name
