@@ -62,9 +62,6 @@ python transform_recordings.py --source ./Data --destination ./Export
 ````
 This will also create an info file w.r.t. the tool used in order to better organize the exported data. Note that this also stores the hash of the G-code (`CapturePayload.hash_g_code()`) to identify files with the exact same NC code.
 
-## Notes
-The footer part of the messages is currently ignored.
-
 ## Disclaimer
 This is no official repository of any company (in particular Siemens). Therefore, there is no support or liability by those companies.
 

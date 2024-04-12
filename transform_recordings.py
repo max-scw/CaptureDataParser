@@ -80,32 +80,35 @@ if __name__ == "__main__":
     # find files to parse
     files = []
     suffix_export_file = f".{opt.compression}" if opt.compression is not None else ".csv"
-    for i, fl in enumerate(list(folder_source.glob("**/*.json"))):
-        # skip first files
+    # walk through folders
+    for i, el in enumerate(folder_source.iterdir()):
+        # skip first folders
         if i < opt.start_index:
             continue
 
-        # construct export file name
-        filename_export = folder_export / fl.with_suffix(suffix_export_file).name
-        # skip if file exists and should not be overwritten
-        if (not filename_export.exists()) or (not opt.no_overwrite):
-            files.append(fl)
+        if el.is_dir():
+            # construct export file name
+            filename_export = folder_export / el.with_suffix(suffix_export_file).name
+            # skip if file exists and should not be overwritten
+            if (not filename_export.exists()) or (not opt.no_overwrite):
+                files.append(list(el.glob("**/*.json")))
 
     info = []
     k = 0
     for i, fl in enumerate(tqdm(files)):
+        foldername = fl[0].parent.name
         # parse file
         try:
             data = parse(fl, rename_hfdata=True)
         except Exception as ex:
-            raise Exception(f"Failed to parse {fl.as_posix()} with the exception: {ex}")
+            raise Exception(f"Failed to parse {foldername} with the exception: {ex}")
 
         try:
             # create unique hash from G code
             id = data.hash_g_code()
         except Exception as ex:
             warnings.warn(
-                f"Failed to hash G-code of {fl.as_posix()} with the exception: {ex}"
+                f"Failed to hash G-code of {foldername} with the exception: {ex}"
                 "\nSkipping this file."
             )
             continue
@@ -114,11 +117,11 @@ if __name__ == "__main__":
             # extract tool information and limit signals to this exact tool
             tool_info, lim = get_tool_info(data, keys_toolinfo)
         except Exception as ex:
-            raise Exception(f"Failed to get tool info {fl.as_posix()} with the exception: {ex}")
+            raise Exception(f"Failed to get tool info {foldername} with the exception: {ex}")
 
         n_rows, n_cols = data.get_item("HFData", limit_to=lim).shape
         info.append({
-            "filename": fl.name,
+            "filename": foldername,
             "n_rows": n_rows, "n_cols": n_cols,
             "date": data["HFData", "Time"][0],
             **tool_info,
@@ -131,7 +134,7 @@ if __name__ == "__main__":
             columns = [el for el in data["HFData"].columns if el not in columns_to_exclude]
 
             # construct export file name
-            filename_export = folder_export / fl.with_suffix(suffix_export_file).name
+            filename_export = (folder_export / foldername).with_suffix(suffix_export_file)
             # export to CSV
             data.get_item("HFData", columns, not_na=True, limit_to=lim).to_csv(
                 filename_export,

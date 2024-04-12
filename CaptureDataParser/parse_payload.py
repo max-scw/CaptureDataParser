@@ -43,9 +43,10 @@ def parse_payload(
                             value = cast_dtype(row["value_type"])(row["value"])
 
                             # standard message contents
+                            time = row["timestamp"]
                             datapoint = {
                                 hd.address: value,
-                                "Time": datetime_parser.parse(row["timestamp"])
+                                "Time": datetime_parser.parse(time) if isinstance(time, str) else time,
                             }
                         except:
                             datapoint = None
@@ -62,7 +63,7 @@ def parse_payload(
                         datapoints.append(datapoint)
             elif ky in ["HFCallEvent", "HFBlockEvent", "HFTimestamp"]:
                 # parse timestamp if exists
-                if "Time" in val:
+                if ("Time" in val) and isinstance(val["Time"], str):
                     val["Time"] = datetime_parser.parse(val["Time"])
                 datapoints.append(val)
             else:
