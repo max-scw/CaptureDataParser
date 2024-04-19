@@ -6,6 +6,8 @@ from tqdm import tqdm
 from setproctitle import setproctitle
 import json
 
+import warnings
+
 from typing import Union, Dict
 
 
@@ -60,6 +62,9 @@ if __name__ == "__main__":
         dft = df.drop("Time", axis=1)
         if opt.in_seconds:
             dt = np.nanmedian(df["Time"].diff())  # nanosecond
+            if dt < 1:
+                warnings.warn(f"Sample time is less than 1 nanosecond. Implausible. Skipping file {fl.name}.")
+                continue
 
             # rows per second
             wz = int(round(opt.window_size * 10 ** 9 / int(dt)))
