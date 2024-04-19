@@ -147,6 +147,7 @@ if __name__ == "__main__":
 
     # create DataFrame
     df = pd.DataFrame(info)
+
     # sort by recording date
     df.sort_values(by="date", inplace=True, ignore_index=True)
 
@@ -161,4 +162,4 @@ if __name__ == "__main__":
     df.to_csv(info_file, header=True, index=False)
 
     find_changed_rows(df[keys_toolinfo])
-    print(f"Exported {k} files + {info_file} to {opt.destination}.")
+    print(f"Exported {k} files + {info_file.name} to {opt.destination}.")
