@@ -10,6 +10,8 @@ from typing import Union, Dict
 
 
 def save_dict_of_dataframes(filename: Union[str, Path], dictionary: Dict[str, pd.DataFrame]) -> bool:
+    """Converts a dictionary of pandas.DataFrames to a dictionary of dictionaries and saves them in a JSON file."""
+    # convert all dataframes to dictionaries and dump into a JSON file
     dictionary_ = {ky: vl.to_dict() for ky, vl in dictionary.items()}
     with open(filename, "w") as fid:
         json.dump(dictionary_, fid)
@@ -25,11 +27,13 @@ def read_dict_of_dataframes(filename: Union[str, Path]) -> Dict[str, pd.DataFram
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=str, help="Directory where zipped recordings are stored")
-    parser.add_argument("--destination", type=str, default="", help="Directory where extracted recordings should be placed to")
+    parser.add_argument("--destination", type=str, default="",
+                        help="Directory where extracted recordings should be placed to")
     parser.add_argument("--file-extension", type=str, default="", help="File type")
     parser.add_argument("--window-size", type=float, default=1,
                         help="Window size. See --in-seconds to make it a duration")
-    parser.add_argument("--in-seconds", action="store_true", help="Window size. See --in-seconds to make it a duration")
+    parser.add_argument("--in-seconds", action="store_true",
+                        help="Window size. See --in-seconds to make it a duration")
     parser.add_argument("--method", type=str, default="rms",
                         help="Aggregation method. Can be 'rms', 'sum', 'mean', 'absSum', or 'absMean'.")
 
@@ -41,7 +45,7 @@ if __name__ == "__main__":
         setproctitle(opt.process_title)
 
     # get files
-    files = list(Path(opt.source).glob(f"*.{opt.file_extension}"))
+    files = list(Path(opt.source).glob(f"*.{opt.file_extension.strip('.')}"))
 
     method = opt.method.lower()
 
@@ -85,7 +89,7 @@ if __name__ == "__main__":
 
         data[fl.stem] = df_aggregated.drop(0)  # drop first row because it is always NaN
 
-    # convert all dataframes to dictionaries and dump into a JSON file
+
     export_filename = f"aggregation_{wz}{'s' if opt.in_seconds else ''}_{method}.json"
     export_file = Path(opt.destination) / export_filename
     save_dict_of_dataframes(export_file, data)
