@@ -149,7 +149,8 @@ if __name__ == "__main__":
     df = pd.DataFrame(info)
 
     # sort by recording date
-    df.sort_values(by="date", inplace=True, ignore_index=True)
+    if len(df) > 1:
+        df.sort_values(by="date", inplace=True, ignore_index=True)
 
     info_file = folder_export / "info.csv"
     i = 0
