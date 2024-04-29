@@ -13,8 +13,11 @@ def extract_files(folder_src: Path, folder_dst: Path = None) -> Path:
     files = list(folder_src.glob("*.zip"))
     for src in tqdm(files):
         dst = folder_dst / src.stem
-        with ZipFile(src, "r") as fid:
-            fid.extractall(dst)
+        try:
+            with ZipFile(src, "r") as fid:
+                fid.extractall(dst)
+        except Exception as ex:
+            raise Exception(f"Failed to unzip {foldername} with exception: {ex}")
     return folder_dst
 
 
