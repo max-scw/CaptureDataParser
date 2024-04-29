@@ -101,14 +101,14 @@ if __name__ == "__main__":
         try:
             data = parse(fl, rename_hfdata=True)
         except Exception as ex:
-            raise Exception(f"Failed to parse {foldername} with the exception: {ex}")
+            raise Exception(f"Failed to parse {foldername} with exception: {ex}")
 
         try:
             # create unique hash from G code
             id = data.hash_g_code()
         except Exception as ex:
             warnings.warn(
-                f"Failed to hash G-code of {foldername} with the exception: {ex}"
+                f"Failed to hash G-code of {foldername} with exception: {ex}"
                 "\nSkipping this file."
             )
             continue

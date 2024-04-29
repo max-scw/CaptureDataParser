@@ -139,9 +139,9 @@ class CapturePayload:
         group = "HFBlockEvent"
         key = "GCode"
         if group not in self.data:
-            raise Exception(f"Group {group} not in data. No G-Code hashing available")
+            raise Exception(f"Group {group} not in data. No G-Code hashing available.")
         if key not in self.data[group]:
-            raise Exception(f"Signal {key} not in data['{group}']. No G-Code hashing available")
+            raise Exception(f"Signal {key} not in data['{group}']. No G-Code hashing available.")
         return hash_list(self[group, key])
 
 

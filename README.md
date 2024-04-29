@@ -54,14 +54,18 @@ There is another method that might come in handy to identify comparable recordin
 ### Additional functions
 The functions [extract_recordings.py](extract_recordings.py) and [transform_recordings.py](transform_recordings.py) are not part of the module. They may help when processing the raw files by first extracting all [zip files](https://en.wikipedia.org/wiki/ZIP_(file_format)) as can be downloaded from *Capture4Analysis* / *AMW4Analysis*.
 ````shell
-python extract_recordings.py --source ./downloads --destination ./Data
+python extract_recordings.py --source ./downloads --destination ./data
 ````
 Afterward, you may want to transform the files in a more convenient format, e.g. a simple CSV file only of the high frequency signals. This is where [transform_recordings.py](transform_recordings.py) may help.
 ````shell
-python transform_recordings.py --source ./Data --destination ./Export
+python transform_recordings.py --source ./data --destination ./export
 ````
 This will also create an info file w.r.t. the tool used in order to better organize the exported data. Note that this also stores the hash of the G-code (`CapturePayload.hash_g_code()`) to identify files with the exact same NC code.
 
+
+````shell
+python aggregate_signals.py --source ./export --file-extension .zip --window-size 1 --in-seconds --process-title:CaptureDataParser:AggregateSignals
+````
 ## Disclaimer
 This is no official repository of any company (in particular Siemens). Therefore, there is no support or liability by those companies.
 
