@@ -17,7 +17,7 @@ def extract_files(folder_src: Path, folder_dst: Path = None) -> Path:
             with ZipFile(src, "r") as fid:
                 fid.extractall(dst)
         except Exception as ex:
-            raise Exception(f"Failed to unzip {foldername} with exception: {ex}")
+            raise Exception(f"Failed to unzip {src.as_posix()} with exception: {ex}")
     return folder_dst
 
 
