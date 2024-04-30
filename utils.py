@@ -26,7 +26,7 @@ def read_dict_of_dataframes(filename: Union[str, Path]) -> Dict[str, pd.DataFram
 
 def get_files(directory: Union[str, Path], file_extension: str = None) -> (Path, pd.DataFrame):
 
-    pattern = f"*.{file_extension.strip('.')}" if file_extension is not None else "*.*"
+    pattern = f"*.{file_extension.strip('.')}" if (file_extension is not None) and (file_extension != "") else "*"
     # get files
     files = list(Path(directory).glob(pattern))
     # loop over files
