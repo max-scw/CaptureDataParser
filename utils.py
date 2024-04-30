@@ -40,7 +40,7 @@ def get_files(directory: Union[str, Path], file_extension: str = None) -> (Path,
 
 def default_argument_parser():
     parser = ArgumentParser()
-    parser.add_argument("--source", type=str, help="Directory where zipped recordings are stored")
+    parser.add_argument("--source", type=str, help="Directory where zipped recordings are stored", required=True)
     parser.add_argument("--destination", type=str, default="",
                         help="Directory where extracted recordings should be placed to")
     parser.add_argument("--file-extension", type=str, default="", help="File type")
