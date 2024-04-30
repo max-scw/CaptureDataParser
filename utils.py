@@ -3,7 +3,7 @@ import pandas as pd
 import json
 from tqdm import tqdm
 
-from argparse import ArgumentParser
+import argparse
 from setproctitle import setproctitle
 
 from typing import Union, Dict
@@ -39,7 +39,7 @@ def get_files(directory: Union[str, Path], file_extension: str = None) -> (Path,
 
 
 def default_argument_parser():
-    parser = ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=str, help="Directory where zipped recordings are stored", required=True)
     parser.add_argument("--destination", type=str, default="",
                         help="Directory where extracted recordings should be placed to")
@@ -49,11 +49,9 @@ def default_argument_parser():
     return parser
 
 
-def parse_arguments(parser) -> bool:
+def parse_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
     opt = parser.parse_args()
 
     if opt.process_title:
         setproctitle(opt.process_title)
-        return True
-    else:
-        return False
+    return opt
