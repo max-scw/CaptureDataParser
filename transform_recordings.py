@@ -10,8 +10,7 @@ from CaptureDataParser import CapturePayload, parse
 from CaptureDataParser.utils import find_changed_rows, check_key_pattern
 
 
-import argparse
-from setproctitle import setproctitle
+from utils import default_argument_parser, parse_arguments
 
 
 def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFrame, int):
@@ -49,10 +48,7 @@ def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFr
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=str, help="Directory where zipped recordings are stored")
-    parser.add_argument("--destination", type=str, help="Directory where extracted recordings should be placed to")
-    parser.add_argument("--process-title", type=str, default=None, help="Names the process")
+    parser = default_argument_parser()
     parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
     parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
     parser.add_argument("--no-overwrite", action="store_true", help="Do not not overwrite existing files")
@@ -60,10 +56,7 @@ if __name__ == "__main__":
                         help="Compresses exported file "
                              "('bz2', 'gzip', 'tar', 'xz', 'zip', 'zstd').")
 
-    opt = parser.parse_args()
-
-    if opt.process_title:
-        setproctitle(opt.process_title)
+    opt = parse_arguments(parser)
 
     folder_export = Path(opt.destination)
     folder_source = Path(opt.source)

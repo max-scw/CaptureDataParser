@@ -2,9 +2,7 @@ from pathlib import Path
 from zipfile import ZipFile
 from tqdm import tqdm
 
-import argparse
-from setproctitle import setproctitle
-
+from utils import default_argument_parser, parse_arguments
 
 def extract_files(folder_src: Path, folder_dst: Path = None) -> Path:
     if folder_dst is None:
@@ -22,15 +20,9 @@ def extract_files(folder_src: Path, folder_dst: Path = None) -> Path:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=str, help='Directory where zipped recordings are stored')
-    parser.add_argument("--destination", type=str, help='Directory where extracted recordings should be placed to')
-    parser.add_argument('--process-title', type=str, default=None, help='Names the process')
+    parser = default_argument_parser()
 
-    opt = parser.parse_args()
-
-    if opt.process_title:
-        setproctitle(opt.process_title)
+    opt = parse_arguments(parser)
 
     extract_files(Path(opt.source), Path(opt.destination))
     print("all files extracted.")
