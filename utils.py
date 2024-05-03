@@ -34,7 +34,8 @@ def get_files(directory: Union[str, Path], file_extension: str = None) -> (Path,
         # read file
         df = pd.read_csv(fl)
         # convert timestamp
-        df["Time"] = pd.to_datetime(df['Time'], format="ISO8601")
+        if "Time" in df:
+            df["Time"] = pd.to_datetime(df["Time"], format="ISO8601")
         yield fl, df
 
 
