@@ -6,6 +6,8 @@ import re
 
 from CaptureDataParser.HeaderData import SignalHeaderHF
 
+from typing import List, Union
+
 
 def cast_dtype(dtype: str) -> type:
     """
@@ -121,3 +123,53 @@ def check_key_pattern(columns: list, key_pattern: str):
         if m:
             return col
     return None
+
+
+def interplin(
+        x: Union[np.ndarray, List[Union[int, float]]],
+        xp: Union[np.ndarray, List[Union[int, float]]],
+        yp: Union[np.ndarray, List[Union[int, float]]]
+) -> List[Union[int, float]]:
+    # Sort xp and yp together based on the values in xp
+    xp, yp = zip(*sorted(zip(xp, yp)))
+
+    # Convert xp and yp to numpy arrays for efficient computations
+    xp = np.array(xp)
+    yp = np.array(yp)
+
+    interpolated_values = []
+
+    for i in range(len(x)):
+        # Find the index of the closest point in xp that is less than or equal to x[i]
+        idx = np.searchsorted(xp, x[i], side='right') - 1
+
+        if idx == -1:
+            # Extrapolate if x[i] is smaller than the smallest value in xp
+            slope = (yp[1] - yp[0]) / (xp[1] - xp[0])
+            interpolated_value = yp[0] + slope * (x[i] - xp[0])
+            # Check if interpolated value is zero
+            if interpolated_value == 0:
+                # Saturate to the nearest non-zero value
+                idx_nonzero = np.argmax(yp != 0)
+                interpolated_value = yp[idx_nonzero]
+        elif idx == len(xp) - 1:
+            # Extrapolate if x[i] is larger than the largest value in xp
+            slope = (yp[-1] - yp[-2]) / (xp[-1] - xp[-2])
+            interpolated_value = yp[-1] + slope * (x[i] - xp[-1])
+            # Check if interpolated value is zero
+            if interpolated_value == 0:
+                # Saturate to the nearest non-zero value
+                idx_nonzero = np.argmax(yp != 0)
+                interpolated_value = yp[idx_nonzero]
+        else:
+            # Interpolate linearly between the two closest points
+            x_left, x_right = xp[idx], xp[idx + 1]
+            y_left, y_right = yp[idx], yp[idx + 1]
+            slope = (y_right - y_left) / (x_right - x_left)
+            interpolated_value = y_left + slope * (x[i] - x_left)
+
+        interpolated_values.append(interpolated_value)
+
+    return interpolated_values
+
+

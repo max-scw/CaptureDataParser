@@ -7,7 +7,7 @@ from dateutil.tz import tz
 from typing import List, Dict, Tuple, Union, Any
 
 from CaptureDataParser.HeaderData import SignalHeaderHF, SignalHeaderLF, TimeInfo
-from CaptureDataParser.utils import cast_dtype, rename_signal
+from CaptureDataParser.utils import cast_dtype, rename_signal, interplin
 
 
 def parse_payload(
@@ -104,19 +104,22 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
         # keep info on time zone localization
         tzinfo = data["HFTimestamp"]["Time"][0].tzinfo
 
+        # TODO: add plausibility check with initial_time.hf_cycle_time
+
         if initial_time is not None:
             xp0 = initial_time.start_counter
             yp0 = initial_time.start_time
+            assert xp0 == xp[0]
+            assert to_unix_time(yp0) == yp[0]
 
-            xp = [xp0] + xp.to_list()
-            yp = [to_unix_time(yp0)] + yp.to_list()
+            xp = xp.to_list()
+            yp = yp.to_list()
 
         for ky, val in mapping.items():
             if ky in data:
                 x = data[ky][val]
                 # (linear) interpolation
-
-                y = np.interp(x, xp, yp)
+                y = interplin(x, xp, yp)
 
                 # convert to datetime object
                 time = pd.to_datetime(pd.Series(y, name="Time"), utc=tzinfo == tz.tzutc())
@@ -126,6 +129,3 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
 
                 data[ky]["Time"] = time
     return data
-
-
-
