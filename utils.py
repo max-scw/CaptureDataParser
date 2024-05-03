@@ -24,19 +24,20 @@ def read_dict_of_dataframes(filename: Union[str, Path]) -> Dict[str, pd.DataFram
     return {ky: pd.DataFrame(vl) for ky, vl in dictionary_.items()}
 
 
-def get_files(directory: Union[str, Path], file_extension: str = None) -> (Path, pd.DataFrame):
+def get_files(directory: Union[str, Path], file_extension: str = None, start_index: int = 0) -> (Path, pd.DataFrame):
 
     pattern = f"**/*" + (f".{file_extension.strip('.')}" if (file_extension is not None) and (file_extension != "") else "")
     # get files
     files = list(Path(directory).glob(pattern))
     # loop over files
-    for fl in tqdm(files):
+    for i in tqdm(range(start_index, len(files))):
+        file = files[i]
         # read file
-        df = pd.read_csv(fl)
+        df = pd.read_csv(file)
         # convert timestamp
         if "Time" in df:
             df["Time"] = pd.to_datetime(df["Time"], format="ISO8601")
-        yield fl, df
+        yield file, df
 
 
 def default_argument_parser():

@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # process data
     for key in keys:
         data = dict()
-        for fl, df in get_files(opt.source, opt.file_extension):
+        for fl, df in get_files(opt.source, opt.file_extension, opt.start_index):
             try:
                 sig = df[key]
                 # time
