@@ -83,7 +83,7 @@ if __name__ == "__main__":
         export_path.mkdir(parents=True, exist_ok=True)
 
     # process data
-    for key in keys:
+    for key in opt.signal:
         data = dict()
         for fl, df in get_files(opt.source, opt.file_extension, opt.start_index):
             try:
