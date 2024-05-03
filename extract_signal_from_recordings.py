@@ -75,8 +75,6 @@ if __name__ == "__main__":
 
     opt = parse_arguments(parser)
 
-    # process user inputs
-    keys = opt.signal
     # TODO: allow patterns
 
     export_path = Path(opt.destination)
@@ -110,6 +108,7 @@ if __name__ == "__main__":
                 try:
                     sig = aggregate_signal(
                         sig,
+                        time=time,
                         method=opt.method,
                         window_size=opt.window_size,
                         in_seconds=opt.in_seconds
@@ -133,7 +132,7 @@ if __name__ == "__main__":
             if opt.window_size > 0:
                 filename += f"_{opt.method}{opt.window_size}" + "s" if opt.in_seconds else ""
             if opt.limit > 0:
-                filename += f"_{opt.limit}" + "s" if opt.in_seconds else ""
+                filename += f"_{int(opt.limit)}" + "s" if opt.in_seconds else ""
             save_dict_of_dataframes(export_path / filename, data)
         else:
             warnings.warn(f"No data found for key '{key}'")

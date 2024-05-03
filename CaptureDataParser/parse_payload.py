@@ -109,11 +109,13 @@ def construct_time(data: Dict[str, pd.DataFrame], initial_time: TimeInfo = None)
         if initial_time is not None:
             xp0 = initial_time.start_counter
             yp0 = initial_time.start_time
-            assert xp0 == xp[0]
-            assert to_unix_time(yp0) == yp[0]
 
             xp = xp.to_list()
             yp = yp.to_list()
+
+            if xp0 != xp[0]:
+                xp = [xp0] + xp
+                yp = [to_unix_time(yp0)] + yp
 
         for ky, val in mapping.items():
             if ky in data:
