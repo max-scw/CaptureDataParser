@@ -107,19 +107,24 @@ if __name__ == "__main__":
 
             # aggregate signal
             if opt.window_size > 0:
-                sig = aggregate_signal(
-                    sig,
-                    method=opt.method,
-                    window_size=opt.window_size,
-                    in_seconds=opt.in_seconds
-                )
+                try:
+                    sig = aggregate_signal(
+                        sig,
+                        method=opt.method,
+                        window_size=opt.window_size,
+                        in_seconds=opt.in_seconds
+                    )
+                except Exception as ex:
+                    raise Exception(f"Failed to aggregate {key} in {fl.as_posix()} with exception: {ex}")
             # limit signal length
             if opt.limit > 0:
-                fct = (1 / get_time_period(time, True)) if opt.in_seconds else 1
-                end = int(round(opt.limit * fct))
-                # slice signal
-                sig = sig[:end]
-
+                try:
+                    fct = (1 / get_time_period(time, True)) if opt.in_seconds else 1
+                    end = int(round(opt.limit * fct))
+                    # slice signal
+                    sig = sig[:end]
+                except Exception as ex:
+                    raise Exception(f"Failed to limit {key} in {fl.as_posix()} with exception: {ex}")
             data[fl.stem] = sig
 
         # save data
