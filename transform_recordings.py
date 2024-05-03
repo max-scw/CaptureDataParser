@@ -49,7 +49,6 @@ def get_tool_info(payload: CapturePayload, keys: List[str] = None) -> (pd.DataFr
 
 if __name__ == "__main__":
     parser = default_argument_parser()
-    parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
     parser.add_argument("--only-info", action="store_true", help="Do not export files, just collect information")
     parser.add_argument("--no-overwrite", action="store_true", help="Do not not overwrite existing files")
     parser.add_argument("--compression", type=str, default=None,

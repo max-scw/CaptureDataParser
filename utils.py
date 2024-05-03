@@ -45,6 +45,7 @@ def default_argument_parser():
     parser.add_argument("--destination", type=str, default="",
                         help="Directory where extracted recordings should be placed to")
     parser.add_argument("--file-extension", type=str, default="", help="File type")
+    parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
 
     parser.add_argument('--process-title', type=str, default=None, help="Names the process")
     return parser
