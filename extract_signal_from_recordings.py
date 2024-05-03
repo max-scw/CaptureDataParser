@@ -75,7 +75,6 @@ if __name__ == "__main__":
 
     opt = parse_arguments(parser)
 
-
     # process user inputs
     keys = opt.signal
     # TODO: allow patterns
@@ -91,7 +90,15 @@ if __name__ == "__main__":
         for fl, df in get_files(opt.source, opt.file_extension):
             try:
                 sig = df[key]
-                time = df["Time"] if opt.in_seconds or opt.window_size else None
+                # time
+                if opt.in_seconds:
+                    if "Time" in df:
+                        time = df["Time"]
+                    else:
+                        warnings.warn(f"No time found in {fl.as_posix()}. Skipping this file.")
+                        continue
+                else:
+                    time = None
             except KeyError as ex:
                 raise Exception(f"Signal '{key}' not found in {fl.as_posix()}. "
                                 f"Available signals are {', '.join(df.keys())}")
