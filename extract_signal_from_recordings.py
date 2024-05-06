@@ -62,7 +62,9 @@ def aggregate_signal(
 
 if __name__ == "__main__":
     parser = default_argument_parser()
-    parser.add_argument("--signal", type=str,  nargs='+', help="Signal key", required=True)
+    parser.add_argument("--signal", type=str,  nargs="+", help="Signal key", required=True)
+    parser.add_argument("--data-type",  type=str, default="",
+                        help="Data type to which the signal should be casted.")
     # add arguments to aggregate signals
     parser.add_argument("--window-size", type=float, default=-1,
                         help="Window size. See --in-seconds to make it a duration")
@@ -74,8 +76,6 @@ if __name__ == "__main__":
                         help="Aggregation method. Can be 'rms', 'sum', 'mean', 'absSum', or 'absMean'.")
 
     opt = parse_arguments(parser)
-
-    # TODO: allow patterns
 
     export_path = Path(opt.destination)
     # create directory if it does nox exist
@@ -115,6 +115,32 @@ if __name__ == "__main__":
                     )
                 except Exception as ex:
                     raise Exception(f"Failed to aggregate {key} in {fl.as_posix()} with exception: {ex}")
+
+            # data type
+            if opt.data_type.lower() == "float16":
+                dtype = np.float16
+            elif opt.data_type.lower() == "float32":
+                dtype = np.float32
+            elif opt.data_type.lower() == "float64":
+                dtype = np.float64
+            elif opt.data_type.lower() == "int8":
+                dtype = np.int8
+            elif opt.data_type.lower() == "int16":
+                dtype = np.int16
+            elif opt.data_type.lower() == "int32":
+                dtype = np.int32
+            elif opt.data_type.lower() == "uint8":
+                dtype = np.uint8
+            elif opt.data_type.lower() == "uint16":
+                dtype = np.uint16
+            elif opt.data_type.lower() == "uint32":
+                dtype = np.uint32
+            else:
+                dtype = None
+
+            if dtype is not None:
+                sig = sig.astype(dtype)
+
             # limit signal length
             if opt.limit > 0:
                 try:
@@ -133,6 +159,9 @@ if __name__ == "__main__":
                 filename += f"_{opt.method}{opt.window_size}" + "s" if opt.in_seconds else ""
             if opt.limit > 0:
                 filename += f"_{int(opt.limit)}" + "s" if opt.in_seconds else ""
-            save_dict_of_dataframes(export_path / filename, data)
+            if opt.data_type and dtype:
+                filename += f"_{opt.data_type}"
+
+            save_dict_of_dataframes((export_path / filename).with_suffix(".json"), data)
         else:
             warnings.warn(f"No data found for key '{key}'")
