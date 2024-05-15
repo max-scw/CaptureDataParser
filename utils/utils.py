@@ -3,9 +3,6 @@ import pandas as pd
 import json
 from tqdm import tqdm
 
-import argparse
-from setproctitle import setproctitle
-
 from typing import Union, Dict
 
 
@@ -38,23 +35,3 @@ def get_files(directory: Union[str, Path], file_extension: str = None, start_ind
         if "Time" in df:
             df["Time"] = pd.to_datetime(df["Time"], format="ISO8601")
         yield file, df
-
-
-def default_argument_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=str, help="Directory where zipped recordings are stored", required=True)
-    parser.add_argument("--destination", type=str, default="",
-                        help="Directory where extracted recordings should be placed to")
-    parser.add_argument("--file-extension", type=str, default="", help="File type")
-    parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
-
-    parser.add_argument('--process-title', type=str, default=None, help="Names the process")
-    return parser
-
-
-def parse_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
-    opt = parser.parse_args()
-
-    if opt.process_title:
-        setproctitle(opt.process_title)
-    return opt
