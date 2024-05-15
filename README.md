@@ -63,8 +63,15 @@ python transform_recordings.py --source ./data --destination ./export
 This will also create an info file w.r.t. the tool used in order to better organize the exported data. Note that this also stores the hash of the G-code (`CapturePayload.hash_g_code()`) to identify files with the exact same NC code.
 
 
+One can download the files manually by the GUI of *Capture* or you may want to use the API to download all files automatically. Add `--delete-files` as flag to delete the files on the Edge after the download.
+````shell
+python download_files.py --address 192.168.10.5:5443 --username USERNAME --password PASSWORD --destination ./downloads
+````
+
 ````shell
 python aggregate_signals.py --source ./export --file-extension .zip --window-size 1 --in-seconds --process-title:CaptureDataParser:AggregateSignals
+python aggregate_signals.py --source ./data/exported_recordings --file-extension .zip --window-size 1 --in-seconds --process-title SCHWMAX:CaptureDataParser:AggregateSignals
+
 ````
 ## Disclaimer
 This is no official repository of any company (in particular Siemens). Therefore, there is no support or liability by those companies.

@@ -170,10 +170,13 @@ if __name__ == "__main__":
     parser.add_argument("--address", type=str, help="IP address of the Sinumerik Edge")
     parser.add_argument("--username", type=str, help="User name to authenticate at the Capture app.")
     parser.add_argument("--password", type=str, help="Corresponding password for authentication at the Capture app.")
+    parser.add_argument("--delete-files", action="store_true", help="Delete files after download.")
 
     parser.add_argument("--logging-level", type=str, default="INFO", help="Logging level")
 
     opt = parser.parse_args()
+    opt.logging_level = logging.DEBUG
+
 
     # check destination directory
     download_dir = Path(opt.destination)
@@ -202,7 +205,7 @@ if __name__ == "__main__":
         address=opt.address,
         username=opt.username,
         password=opt.password,
-        download_dir=download_dir
+        download_dir=download_dir,
     )
 
-    downloader.download_files()
+    downloader.download_files(delete_downloaded_files=opt.delete_files)
