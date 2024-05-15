@@ -13,13 +13,6 @@ from utils import (
 )
 
 
-from itertools import zip_longest
-
-def stack_images_rows_with_pad(list_of_images):
-    func = lambda x: np.array(list(zip_longest(*x, fillvalue=0)))  # applied row wise
-    return np.array(list(map(func, zip(*list_of_images)))).transpose(2, 0, 1)
-
-
 if __name__ == "__main__":
     parser = default_argument_parser()
     parser.add_argument("--signal", type=str,  nargs="+", help="Signal key")
@@ -37,7 +30,7 @@ if __name__ == "__main__":
     parser.add_argument("--method", type=str, default="rms",
                         help="Aggregation method. Can be 'rms', 'sum', 'mean', 'absSum', or 'absMean'.")
     # meta data
-    parser.add_argument("--filter-key", type=str, default=None,  # "/Channel/State/actTNumber"
+    parser.add_argument("--filter-key", type=str, nargs="+", default=None,  # "/Channel/State/actTNumber"
                         help="Column in meta data file (e.g. '/Channel/State/actTNumber').")
     opt = parse_arguments(parser)
 

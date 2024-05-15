@@ -26,13 +26,13 @@ def get_list_of_files(
         path: Union[str, Path],
         file_extension: str = None,
         # filter
-        filter_key: str = None
+        filter_keys: Union[Any, List[Any]] = None
 ):
     if (file_extension is not None) and (file_extension != ""):
         path = Path(path) / (f"**/*" + f".{file_extension.strip('.')}")
 
     # get files
-    if filter_key:  # assume meta data file
+    if filter_keys:  # assume meta data file
         # read metadata
         try:
             info = read_info_files(path)
@@ -40,13 +40,7 @@ def get_list_of_files(
             raise FileNotFoundError(f"Metadata file(s) not found on {path.as_posix()}: {ex}")
 
         # filter data
-        filter_key_value_uq = info[filter_key].unique()
-        filter_key_value_uq = filter_key_value_uq[np.invert(np.isnan(filter_key_value_uq))]
-
-        files_per_key = dict()
-        for ky in filter_key_value_uq:
-            lg = info[filter_key] == ky
-            files_per_key[ky] = info["filename"][lg]
+        files_per_key = info.groupby(filter_keys)["filename"]
     else:
         files_per_key = {None: list(Path().glob(path))}
 
