@@ -4,7 +4,7 @@ import sys
 import argparse
 from setproctitle import setproctitle
 
-from cast import cast_logging_level
+from utils import cast_logging_level
 
 
 def default_argument_parser():
@@ -16,7 +16,7 @@ def default_argument_parser():
     parser.add_argument("--start-index", type=int, default=0, help="ith file to start from")
 
     parser.add_argument('--process-title', type=str, default=None, help="Names the process")
-    parser.add_argument("--logging-level", type=str, default="INFO", help="Logging level")
+    parser.add_argument("--logging-level", type=str, default="DEBUG", help="Logging level")
     return parser
 
 
