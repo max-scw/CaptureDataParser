@@ -22,6 +22,7 @@ def default_argument_parser():
 
 def parse_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
     opt = parser.parse_args()
+    logging.debug(f"Input arguments: {opt}")
 
     if "process_title" in opt and opt.process_title:
         setproctitle(opt.process_title)
