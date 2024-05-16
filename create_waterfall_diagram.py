@@ -101,11 +101,12 @@ if __name__ == "__main__":
         # stack columns and convert to image
         img = Image.fromarray(np.stack(mat, axis=1))
         # save image
-        filename_parts = ["WFD"]
-        filename_parts.append(key_sig.replace('|', '-'))
+        filename_parts = ["WFD", key_sig.replace('|', '-')]
         if ky_flt:
-            filename_parts.append(f"{ky_flt}")
+            filename_parts += list(ky_flt)
         filename = "_".join(filename_parts) + ".png"
+        # save image
         img.save(filename)
+
         logging.info(f"Image saved to {filename}.")
-    logging.info("done.")
+    logging.info(f"done {__file__}.")
