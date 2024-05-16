@@ -78,6 +78,8 @@ def read_info_files(path: str = "info*.csv") -> pd.DataFrame:
         files.append(df)
 
     df = pd.concat(files)
+    # drop duplicates if some of the files contain redundant data
+    df = df.drop_duplicates()
     # sort by recording date
     df.sort_values(by="date", inplace=True, ignore_index=True)
     return df
