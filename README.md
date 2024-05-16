@@ -68,11 +68,7 @@ One can download the files manually by the GUI of *Capture* or you may want to u
 python download_files.py --address 192.168.10.5:5443 --username USERNAME --password PASSWORD --destination ./downloads
 ````
 
-````shell
-python aggregate_signals.py --source ./export --file-extension .zip --window-size 1 --in-seconds --process-title:CaptureDataParser:AggregateSignals
-python aggregate_signals.py --source ./data/exported_recordings --file-extension .zip --window-size 1 --in-seconds --process-title SCHWMAX:CaptureDataParser:AggregateSignals
 
-````
 ## Disclaimer
 This is no official repository of any company (in particular Siemens). Therefore, there is no support or liability by those companies.
 
