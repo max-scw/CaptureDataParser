@@ -34,10 +34,6 @@ if __name__ == "__main__":
                         help="Column in meta data file (e.g. '/Channel/State/actTNumber').")
     opt = parse_arguments(parser)
 
-    opt.signal = ["CURRENT|X1"]
-    opt.source = "data/exported_recordings/*.zip"
-    logging.debug(opt)
-
     # process data
     if (opt.max_value is None) or (opt.min_value is None) or (opt.max_length is None):
         characteristics = get_data_characteristics(
