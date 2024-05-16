@@ -30,6 +30,8 @@ if __name__ == "__main__":
     parser.add_argument("--method", type=str, default="rms",
                         help="Aggregation method. Can be 'rms', 'sum', 'mean', 'absSum', or 'absMean'.")
     # meta data
+    parser.add_argument("--path-to-metadata", type=str, default=None,
+                        help="Metadata file or file pattern (usually called 'info.csv')")
     parser.add_argument("--filter-key", type=str, nargs="+", default=None,  # "/Channel/State/actTNumber"
                         help="Column in meta data file (e.g. '/Channel/State/actTNumber').")
     opt = parse_arguments(parser)
@@ -39,7 +41,6 @@ if __name__ == "__main__":
         characteristics = get_data_characteristics(
             opt.signal,
             directory=opt.source,
-            file_extension=opt.file_extension,
             start_index=opt.start_index,
             in_seconds=opt.in_seconds
         )
@@ -63,8 +64,8 @@ if __name__ == "__main__":
         # loop over files
         ky_flt = None
         for fl, df, ky_flt in get_files(
-                opt.source,
-                opt.file_extension,
+                directory=opt.source,
+                path_to_metadata=opt.path_to_metadata,
                 filter_key=opt.filter_key,
                 start_index=opt.start_index
         ):

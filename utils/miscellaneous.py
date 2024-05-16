@@ -23,41 +23,43 @@ def read_dict_of_dataframes(filename: Union[str, Path]) -> Dict[str, pd.DataFram
 
 
 def get_list_of_files(
-        path: Union[str, Path],
-        file_extension: str = None,
+        directory: Union[str, Path],
         # filter
+        path_to_metadata: Union[str, Path] = None,
         filter_keys: Union[Any, List[Any]] = None
 ):
-    if (file_extension is not None) and (file_extension != ""):
-        path = Path(path) / (f"**/*" + f".{file_extension.strip('.')}")
 
     # get files
-    if filter_keys:  # assume meta data file
+    if path_to_metadata is not None:
         # read metadata
         try:
-            info = read_info_files(path)
+            info = read_info_files(path_to_metadata)
         except FileNotFoundError as ex:
-            raise FileNotFoundError(f"Metadata file(s) not found on {path.as_posix()}: {ex}")
+            raise FileNotFoundError(f"Metadata file(s) not found on {path_to_metadata.as_posix()}: {ex}")
 
-        # filter data
-        files_per_key = info.groupby(filter_keys)["filename"]
+        if filter_keys is None:
+            files_per_key = info["filename"]
+        else:
+            # filter data
+            files_per_key = info.groupby(filter_keys)["filename"]
+            files_per_key = [(ky, fls.apply(lambda x: directory / x)) for ky, fls in files_per_key]
     else:
-        files_per_key = {None: list(Path().glob(path))}
+        files_per_key = {None: list(Path().glob(directory))}
 
     for ky, files in files_per_key.items():
         yield files, ky
 
 
 def get_files(
-        path: Union[str, Path],
-        file_extension: str = None,
+        directory: Union[str, Path],
         # filter
-        filter_key: str = None,
+        path_to_metadata: Union[str, Path] = None,
+        filter_key: Union[Any, List[Any]] = None,
         start_index: int = 0,
 
 ) -> Tuple[Path, pd.DataFrame, Any]:
 
-    for files, key_filter in get_list_of_files(path, file_extension, filter_key):
+    for files, key_filter in get_list_of_files(directory, path_to_metadata, filter_key):
         # loop over files
         for i in tqdm(range(start_index, len(files))):
             file = files[i]
@@ -70,10 +72,10 @@ def get_files(
             yield file, df, key_filter
 
 
-def read_info_files(path: str = "info*.csv") -> pd.DataFrame:
+def read_info_files(path: Union[str, Path] = "info*.csv") -> pd.DataFrame:
     """read meta data file"""
     files = []
-    for fl in Path().glob(path):
+    for fl in Path().glob(path.as_posix() if isinstance(path, Path) else path):
         df = pd.read_csv(fl)
         files.append(df)
 
