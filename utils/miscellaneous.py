@@ -23,11 +23,20 @@ def read_dict_of_dataframes(filename: Union[str, Path]) -> Dict[str, pd.DataFram
 
 
 def get_list_of_files(
-        directory: Union[str, Path],
+        data_directory: Union[str, Path],
+        file_extension: str = None,
         # filter
         path_to_metadata: Union[str, Path] = None,
         filter_keys: Union[Any, List[Any]] = None
-):
+) -> Tuple[List[Path], Union[Any, List[Any]]]:
+    # ensure pathlib object
+    data_directory = Path(data_directory)
+    # create extension pattern
+    pattern = "*." + file_extension.strip(".") if file_extension else "*"
+
+    def reconstruct_path(x: str):
+        p = data_directory / x
+        return p.with_suffix(file_extension).resolve() if file_extension else p
 
     # get files
     if path_to_metadata is not None:
@@ -38,28 +47,33 @@ def get_list_of_files(
             raise FileNotFoundError(f"Metadata file(s) not found on {path_to_metadata.as_posix()}: {ex}")
 
         if filter_keys is None:
-            files_per_key = info["filename"]
+            files_per_key = {None: info["filename"].apply(reconstruct_path).tolist()}
         else:
             # filter data
             files_per_key = info.groupby(filter_keys)["filename"]
-            files_per_key = [(ky, fls.apply(lambda x: directory / x)) for ky, fls in files_per_key]
+            files_per_key = [(ky, fls.apply(reconstruct_path).tolist()) for ky, fls in files_per_key]
     else:
-        files_per_key = {None: list(Path().glob(directory))}
+
+        files_per_key = {None: list(Path(data_directory).glob(pattern))}
 
     for ky, files in files_per_key.items():
         yield files, ky
 
 
 def get_files(
-        directory: Union[str, Path],
+        data_directory: Union[str, Path],
+        file_extension: str = None,
         # filter
         path_to_metadata: Union[str, Path] = None,
         filter_key: Union[Any, List[Any]] = None,
         start_index: int = 0,
-
 ) -> Tuple[Path, pd.DataFrame, Any]:
-
-    for files, key_filter in get_list_of_files(directory, path_to_metadata, filter_key):
+    for files, key_filter in get_list_of_files(
+            data_directory,
+            file_extension,
+            path_to_metadata,
+            filter_key
+    ):
         # loop over files
         for i in tqdm(range(start_index, len(files))):
             file = files[i]
@@ -85,3 +99,5 @@ def read_info_files(path: Union[str, Path] = "info*.csv") -> pd.DataFrame:
     # sort by recording date
     df.sort_values(by="date", inplace=True, ignore_index=True)
     return df
+
+

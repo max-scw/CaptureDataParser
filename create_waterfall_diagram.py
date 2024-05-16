@@ -40,7 +40,8 @@ if __name__ == "__main__":
     if (opt.max_value is None) or (opt.min_value is None) or (opt.max_length is None):
         characteristics = get_data_characteristics(
             opt.signal,
-            directory=opt.source,
+            data_directory=opt.source,
+            file_extension=opt.file_extension,
             start_index=opt.start_index,
             in_seconds=opt.in_seconds
         )
@@ -64,7 +65,8 @@ if __name__ == "__main__":
         # loop over files
         ky_flt = None
         for fl, df, ky_flt in get_files(
-                directory=opt.source,
+                data_directory=opt.source,
+                file_extension=opt.file_extension,
                 path_to_metadata=opt.path_to_metadata,
                 filter_key=opt.filter_key,
                 start_index=opt.start_index

@@ -13,7 +13,8 @@ from typing import Dict, Any, Union, List
 
 def get_data_characteristics(
         signals,
-        directory: Union[str, Path],
+        data_directory: Union[str, Path],
+        file_extension: str = None,
         path_to_metadata: Union[str, Path] = None,
         filter_key: Union[Any, List[Any]] = None,
         start_index: int = 0,
@@ -27,7 +28,8 @@ def get_data_characteristics(
     }
     for key in signals:
         for fl, df, _ in get_files(
-                directory,
+                data_directory=data_directory,
+                file_extension=file_extension,
                 path_to_metadata=path_to_metadata,
                 start_index=start_index,
                 filter_key=filter_key
@@ -61,7 +63,8 @@ if __name__ == "__main__":
     # process data
     get_data_characteristics(
         opt.signals,
-        directory=opt.source,
+        data_directory=opt.source,
+        file_extension=opt.file_extension,
         path_to_metadata=opt.path_to_metadata,
         filter_key=opt.filter_key,
         start_index=opt.start_index
