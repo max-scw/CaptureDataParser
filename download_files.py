@@ -175,8 +175,6 @@ if __name__ == "__main__":
     parser.add_argument("--logging-level", type=str, default="INFO", help="Logging level")
 
     opt = parser.parse_args()
-    opt.logging_level = logging.DEBUG
-
 
     # check destination directory
     download_dir = Path(opt.destination)
