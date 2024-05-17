@@ -51,7 +51,7 @@ def get_list_of_files(
         else:
             # filter data
             files_per_key = info.groupby(filter_keys)["filename"]
-            files_per_key = [(ky, fls.apply(reconstruct_path).tolist()) for ky, fls in files_per_key]
+            files_per_key = {ky: fls.apply(reconstruct_path).tolist() for ky, fls in files_per_key}
     else:
 
         files_per_key = {None: list(Path(data_directory).glob(pattern))}
