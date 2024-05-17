@@ -106,7 +106,7 @@ if __name__ == "__main__":
         # save image
         filename_parts = ["WFD", key_sig.replace('|', '-')]
         if ky_flt:
-            filename_parts += list(ky_flt)
+            filename_parts += [f"{el}" for el in ky_flt]
         filename = "_".join(filename_parts) + ".png"
         # save image
         img.save(filename)
