@@ -8,6 +8,7 @@ from get_data_characteristics import get_data_characteristics
 from utils import (
     default_argument_parser,
     parse_arguments,
+    get_list_of_files,
     get_files,
     get_signal
 )
@@ -63,53 +64,52 @@ if __name__ == "__main__":
     mat = []
     for key_sig in opt.signal:
         # loop over files
-        ky_flt = None
-        for fl, df, ky_flt in get_files(
+        for files, ky_flt in get_list_of_files(
                 data_directory=opt.source,
                 file_extension=opt.file_extension,
                 path_to_metadata=opt.path_to_metadata,
-                filter_key=opt.filter_key,
-                start_index=opt.start_index
+                filter_keys=opt.filter_key
         ):
-            sig = get_signal(
-                df,
-                key_sig,
-                window_size=opt.window_size,
-                method=opt.method,
-                in_seconds=opt.in_seconds,
-                limit=opt.limit
-            )
+            for fl, df in get_files(files=files, start_index=opt.start_index):
+                sig = get_signal(
+                    df,
+                    key_sig,
+                    window_size=opt.window_size,
+                    method=opt.method,
+                    in_seconds=opt.in_seconds,
+                    limit=opt.limit
+                )
 
-            # normalize signal
-            sig_nrm = (sig - opt.min_value) / (opt.max_value - opt.min_value)
-            # pad signal
+                # normalize signal
+                sig_nrm = (sig - opt.min_value) / (opt.max_value - opt.min_value)
+                # pad signal
 
-            # Apply the colormap like a function to any array:
-            colored_image = cm(sig_nrm)
+                # Apply the colormap like a function to any array:
+                colored_image = cm(sig_nrm)
 
-            # Obtain a 4-channel image (R,G,B,A) in float [0, 1]
-            # But we want to convert to RGB in uint8 and save it:
-            # (colored_image[:, :, :3] * 255).astype(np.uint8)
-            column = (colored_image[:, :3] * 255).astype(np.uint8)
+                # Obtain a 4-channel image (R,G,B,A) in float [0, 1]
+                # But we want to convert to RGB in uint8 and save it:
+                # (colored_image[:, :, :3] * 255).astype(np.uint8)
+                column = (colored_image[:, :3] * 255).astype(np.uint8)
 
-            mat.append(column)
+                mat.append(column)
 
-        # pad image
-        fill_value = (cm([0])[:, :3] * 255).astype(np.uint8)
-        # maximum length
-        n = max(map(len, mat))
-        # pad matrix
-        mat = [np.vstack((el, fill_value.repeat(n - len(el), axis=0))) for el in mat]
+            # pad image
+            fill_value = (cm([0])[:, :3] * 255).astype(np.uint8)
+            # maximum length
+            n = max(map(len, mat))
+            # pad matrix
+            mat = [np.vstack((el, fill_value.repeat(n - len(el), axis=0))) for el in mat]
 
-        # stack columns and convert to image
-        img = Image.fromarray(np.stack(mat, axis=1))
-        # save image
-        filename_parts = ["WFD", key_sig.replace('|', '-')]
-        if ky_flt:
-            filename_parts += [f"{el}" for el in ky_flt]
-        filename = "_".join(filename_parts) + ".png"
-        # save image
-        img.save(filename)
+            # stack columns and convert to image
+            img = Image.fromarray(np.stack(mat, axis=1))
+            # save image
+            filename_parts = ["WFD", key_sig.replace('|', '-')]
+            if ky_flt:
+                filename_parts += [f"{el}" for el in ky_flt]
+            filename = "_".join(filename_parts) + ".png"
+            # save image
+            img.save(filename)
 
-        logging.info(f"Image saved to {filename}.")
+            logging.info(f"Image saved to {filename}.")
     logging.info(f"done {__file__}.")

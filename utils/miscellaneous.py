@@ -61,29 +61,23 @@ def get_list_of_files(
 
 
 def get_files(
-        data_directory: Union[str, Path],
-        file_extension: str = None,
-        # filter
-        path_to_metadata: Union[str, Path] = None,
-        filter_key: Union[Any, List[Any]] = None,
+        files: Union[List[Union[str, Path]], Tuple[List[Union[str, Path]], Any]],
         start_index: int = 0,
 ) -> Tuple[Path, pd.DataFrame, Any]:
-    for files, key_filter in get_list_of_files(
-            data_directory,
-            file_extension,
-            path_to_metadata,
-            filter_key
-    ):
-        # loop over files
-        for i in tqdm(range(start_index, len(files))):
-            file = files[i]
-            # read file
-            df = pd.read_csv(file)
-            # convert timestamp
-            if "Time" in df:
-                df["Time"] = pd.to_datetime(df["Time"], format="ISO8601")
-            df.name = file.as_posix()
-            yield file, df, key_filter
+
+    if isinstance(files, tuple) and isinstance(files[0], list) and isinstance(files[0][0], (str, Path)):
+        files = files[0]
+
+    # loop over files
+    for i in tqdm(range(start_index, len(files))):
+        file = files[i]
+        # read file
+        df = pd.read_csv(file)
+        # convert timestamp
+        if "Time" in df:
+            df["Time"] = pd.to_datetime(df["Time"], format="ISO8601")
+        df.name = file.as_posix()
+        yield file, df
 
 
 def read_info_files(path: Union[str, Path] = "info*.csv") -> pd.DataFrame:

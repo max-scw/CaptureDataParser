@@ -4,6 +4,7 @@ import logging
 from utils import (
     default_argument_parser,
     parse_arguments,
+    get_list_of_files,
     get_files,
     get_signal
 )
@@ -27,13 +28,12 @@ def get_data_characteristics(
         "max_length": 0
     }
     for key in signals:
-        for fl, df, _ in get_files(
+        for fl, df, _ in get_files(get_list_of_files(
                 data_directory=data_directory,
                 file_extension=file_extension,
                 path_to_metadata=path_to_metadata,
-                start_index=start_index,
-                filter_key=filter_key
-        ):
+                filter_keys=filter_key
+        ), start_index=start_index):
             sig = get_signal(df, key, in_seconds=in_seconds)
 
             if sig.max() > characteristics["max_value"]:
