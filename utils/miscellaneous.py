@@ -3,8 +3,9 @@ import pandas as pd
 import numpy as np
 import json
 from tqdm import tqdm
+from itertools import chain
 
-from typing import Union, Dict, Tuple, List, Any
+from typing import Union, Dict, Tuple, List, Any, Generator
 
 
 def save_dict_of_dataframes(filename: Union[str, Path], dictionary: Dict[str, pd.DataFrame]) -> bool:
@@ -61,12 +62,13 @@ def get_list_of_files(
 
 
 def get_files(
-        files: Union[List[Union[str, Path]], Tuple[List[Union[str, Path]], Any]],
+        files: Union[List[Union[str, Path]], Generator],
         start_index: int = 0,
 ) -> Tuple[Path, pd.DataFrame, Any]:
 
-    if isinstance(files, tuple) and isinstance(files[0], list) and isinstance(files[0][0], (str, Path)):
-        files = files[0]
+    if isinstance(files, Generator):
+        # flatten list of files and ignore filter keys
+        files = list(chain.from_iterable([p for p, ky in files]))
 
     # loop over files
     for i in tqdm(range(start_index, len(files))):
