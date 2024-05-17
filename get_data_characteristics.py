@@ -28,7 +28,7 @@ def get_data_characteristics(
         "max_length": 0
     }
     for key in signals:
-        for fl, df, _ in get_files(get_list_of_files(
+        for fl, df in get_files(get_list_of_files(
                 data_directory=data_directory,
                 file_extension=file_extension,
                 path_to_metadata=path_to_metadata,
