@@ -19,26 +19,28 @@ def default_argument_parser():
 
     parser.add_argument('--process-title', type=str, default=None, help="Names the process")
     parser.add_argument("--logging-level", type=str, default="DEBUG", help="Logging level")
-    parser.add_argument("--log-file", type=str, default=None, help="Name of the log file")
+    parser.add_argument("--log-file", type=str, default="LOG", help="Name of the log file")
 
     return parser
 
 
 def parse_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
     opt = parser.parse_args()
-    logging.debug(f"Input arguments: {opt}")
 
     if "process_title" in opt and opt.process_title:
         setproctitle(opt.process_title)
 
     # setup logging
     if "logging_level" in opt:
+        level = level = cast_logging_level(opt.logging_level, logging.INFO)
         logging.basicConfig(
-            level=cast_logging_level(opt.logging_level, logging.INFO),
+            level=level,
             format="%(asctime)s [%(levelname)s] %(message)s",
             handlers=[logging.StreamHandler(sys.stdout)]
             + [logging.FileHandler(Path(opt.log_file).with_suffix(".log"))] if opt.log_file else [],
         )
+    logging.debug(f"logging configured.")
+    logging.debug(f"Input arguments: {opt}")
 
     return opt
 
