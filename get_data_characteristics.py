@@ -27,13 +27,14 @@ def get_data_characteristics(
         "max_value": -9e9,
         "max_length": 0
     }
-    for key in signals:
-        for fl, df in get_files(get_list_of_files(
-                data_directory=data_directory,
-                file_extension=file_extension,
-                path_to_metadata=path_to_metadata,
-                filter_keys=filter_key
-        ), start_index=start_index):
+
+    for fl, df in get_files(get_list_of_files(
+            data_directory=data_directory,
+            file_extension=file_extension,
+            path_to_metadata=path_to_metadata,
+            filter_keys=filter_key
+    ), start_index=start_index):
+        for key in signals:
             sig = get_signal(df, key, in_seconds=in_seconds)
 
             if sig.max() > characteristics["max_value"]:
