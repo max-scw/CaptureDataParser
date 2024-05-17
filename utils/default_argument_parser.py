@@ -19,7 +19,7 @@ def default_argument_parser():
 
     parser.add_argument('--process-title', type=str, default=None, help="Names the process")
     parser.add_argument("--logging-level", type=str, default="DEBUG", help="Logging level")
-    parser.add_argument("--log-file", type=str, default="LOG", help="Name of the log file")
+    parser.add_argument("--log-file", type=str, default=None, help="Name of the log file")
 
     return parser
 

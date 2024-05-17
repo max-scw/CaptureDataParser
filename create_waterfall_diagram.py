@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     # process data
     if (opt.max_value is None) or (opt.min_value is None) or (opt.max_length is None):
+        logging.info("determine characteristic data values")
         characteristics = get_data_characteristics(
             opt.signal,
             data_directory=opt.source,
@@ -108,7 +109,7 @@ if __name__ == "__main__":
             # save image
             filename_parts = ["WFD", key_sig.replace('|', '-')]
             if ky_flt:
-                filename_parts += [f"{el}" for el in ky_flt]
+                filename_parts += [f"{el:g}" if isinstance(el, float) else f"{el}" for el in ky_flt]
             filename = "_".join(filename_parts) + ".png"
             # save image
             img.save(filename)
