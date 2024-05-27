@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -20,7 +21,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--min-value", type=float, default=None, help="Minimum value of signals.")
     parser.add_argument("--max-value", type=float, default=None, help="Maximum value of signals.")
-
+    parser.add_argument("--recordings-to-highlight", type=str, default=None,
+                        help="File that lists the recordings to highlight")
     # add arguments to aggregate signals
     parser.add_argument("--window-size", type=float, default=-1,
                         help="Window size. See --in-seconds to make it a duration")
@@ -59,12 +61,22 @@ if __name__ == "__main__":
         logging.debug(opt)
 
     # --- main functionality
+    stems_to_highlight = []
+    if opt.recordings_to_highlight is not None:
+        file_highlights = Path(opt.recordings_to_highlight)
+        if file_highlights.exists() and file_highlights.is_file():
+            # read file
+            with open(file_highlights, "r") as fid:
+                lines = fid.readlines()
+            stems_to_highlight = [el.strip() for el in lines]
+        else:
+            raise FileNotFoundError(f"File {file_highlights.as_posix()} with recordings to highlight not found.")
 
     # Get the color map by name:
     cm = plt.get_cmap("viridis")
 
+    h_highlight = 50  # pixel
     # per signal
-    mat = []
     for key_sig in opt.signal:
         # loop over files
         for files, ky_flt in get_list_of_files(
@@ -73,6 +85,8 @@ if __name__ == "__main__":
                 path_to_metadata=opt.path_to_metadata,
                 filter_keys=opt.filter_key
         ):
+            lines = []
+            highlight = []
             for fl, df in get_files(files=files, start_index=opt.start_index):
                 sig = get_signal(
                     df,
@@ -95,17 +109,42 @@ if __name__ == "__main__":
                 # (colored_image[:, :, :3] * 255).astype(np.uint8)
                 column = (colored_image[:, :3] * 255).astype(np.uint8)
 
-                mat.append(column)
+                lines.append(column)
+                # add info whether this recording should be highlighted or not
+                highlight.append(True if fl.stem in stems_to_highlight else False)
 
             # pad image
             fill_value = (cm([0])[:, :3] * 255).astype(np.uint8)
             # maximum length
-            n = max(map(len, mat))
+            n = max(map(len, lines))
             # pad matrix
-            mat = [np.vstack((el, fill_value.repeat(n - len(el), axis=0))) for el in mat]
+            lines_rgb = [np.vstack((el, fill_value.repeat(n - len(el), axis=0))) for el in lines]
+            # stack columns to matrix
+            mat = np.stack(lines_rgb, axis=1)
+
+            # add highlights
+            if highlight:
+                # add row of zero followed by max value
+                sz_0 = (5, len(lines_rgb), 3)
+                sz_255 = (h_highlight, len(lines_rgb), 3)
+
+                rows = [
+                    np.zeros(sz_0).astype(np.uint8),
+                    np.repeat(
+                        np.repeat(
+                            np.array(highlight, dtype=np.uint8).reshape((1, -1, 1)) * 255,
+                            repeats=h_highlight,
+                            axis=0
+                        ),
+                        repeats=3,
+                        axis=2
+                    )
+                ]
+                # add rows to matrix
+                mat = np.vstack([mat] + rows)
 
             # stack columns and convert to image
-            img = Image.fromarray(np.stack(mat, axis=1))
+            img = Image.fromarray(mat)
             # save image
             filename_parts = ["WFD", key_sig.replace('|', '-')]
             if ky_flt:
