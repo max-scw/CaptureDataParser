@@ -6,12 +6,16 @@ import sys
 from math import ceil
 from argparse import ArgumentParser
 import re
-
-from urllib.parse import urlencode
+from tqdm import tqdm
+import urllib3
 
 from utils import cast_logging_level
 
 from typing import Union, List, Dict, Tuple
+
+
+# Suppress only the single InsecureRequestWarning from urllib3 needed.
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class CaptureFileDownloader:
@@ -53,7 +57,7 @@ class CaptureFileDownloader:
     @staticmethod
     def _check_status_code(req: requests.models.Response, msg: str = "") -> bool:
         if req.status_code == 200:
-            logging.info(" ".join([msg, "Success"]))
+            logging.debug(" ".join([msg, "Success"]))
             return True
         elif req.status_code == 400:
             logging.error(" ".join([msg, "Required parameters are not provided"]))
@@ -139,7 +143,7 @@ class CaptureFileDownloader:
         for job_id in job_ids:
             run_ids = self.get_run_ids(job_id)
 
-            for run_id in run_ids:
+            for run_id in tqdm(run_ids, desc=f"Downloading {job_id}"):
                 filenames = self.get_file_names(job_id, run_id)
 
                 files.append((job_id, run_id, filenames))
@@ -177,9 +181,9 @@ if __name__ == "__main__":
     opt = parser.parse_args()
 
     # check destination directory
-    download_dir = Path(opt.destination)
-    if not download_dir.exists() or not download_dir.is_dir():
-        raise Exception(f"Destination must be an existing directory. ({download_dir.as_posix()})")
+    download_directory = Path(opt.destination)
+    if not download_directory.exists() or not download_directory.is_dir():
+        raise Exception(f"Destination must be an existing directory. ({download_directory.as_posix()})")
 
     # check address
     re_ip_address = re.compile("(\d{1,3}\.){3}\d{1,3}(:\d+)?$")
@@ -203,7 +207,7 @@ if __name__ == "__main__":
         address=opt.address,
         username=opt.username,
         password=opt.password,
-        download_dir=download_dir,
+        download_dir=download_directory,
     )
 
     downloader.download_files(delete_downloaded_files=opt.delete_files)
