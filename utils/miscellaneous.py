@@ -28,7 +28,8 @@ def get_list_of_files(
         file_extension: str = None,
         # filter
         path_to_metadata: Union[str, Path] = None,
-        filter_keys: Union[Any, List[Any]] = None
+        filter_keys: Union[Any, List[Any]] = None,
+        n_min: int = 0
 ) -> Tuple[List[Path], Union[Any, List[Any]]]:
     # ensure pathlib object
     data_directory = Path(data_directory)
@@ -52,7 +53,8 @@ def get_list_of_files(
         else:
             # filter data
             files_per_key = info.groupby(filter_keys)["filename"]
-            files_per_key = {ky: fls.apply(reconstruct_path).tolist() for ky, fls in files_per_key}
+
+            files_per_key = {ky: fls.apply(reconstruct_path).tolist() for ky, fls in files_per_key if len(fls) >= n_min}
     else:
 
         files_per_key = {None: list(Path(data_directory).glob(pattern))}

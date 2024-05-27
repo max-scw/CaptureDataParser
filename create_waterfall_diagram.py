@@ -37,6 +37,9 @@ if __name__ == "__main__":
                         help="Metadata file or file pattern (usually called 'info.csv')")
     parser.add_argument("--filter-key", type=str, nargs="+", default=None,  # "/Channel/State/actTNumber"
                         help="Column in meta data file (e.g. '/Channel/State/actTNumber').")
+    parser.add_argument("--min-n-recordings", type=int, default=0,
+                        help="Number of examples that need to exist to draw a diagram.")
+
     opt = parse_arguments(parser)
 
     # process data
@@ -75,7 +78,7 @@ if __name__ == "__main__":
     # Get the color map by name:
     cm = plt.get_cmap("viridis")
 
-    h_highlight = 50  # pixel
+    h_highlight = 20  # pixel
     # per signal
     for key_sig in opt.signal:
         # loop over files
@@ -83,7 +86,8 @@ if __name__ == "__main__":
                 data_directory=opt.source,
                 file_extension=opt.file_extension,
                 path_to_metadata=opt.path_to_metadata,
-                filter_keys=opt.filter_key
+                filter_keys=opt.filter_key,
+                n_min=opt.min_n_recordings
         ):
             lines = []
             highlight = []
@@ -149,6 +153,7 @@ if __name__ == "__main__":
             filename_parts = ["WFD", key_sig.replace('|', '-')]
             if ky_flt:
                 filename_parts += [f"{el:g}" if isinstance(el, float) else f"{el}" for el in ky_flt]
+            filename_parts.append(f"{len(lines_rgb)}")
             filename = "_".join(filename_parts) + ".png"
             # save image
             img.save(filename)
