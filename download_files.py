@@ -151,6 +151,7 @@ class CaptureFileDownloader:
                     # download file
                     file = self.download_file(job_id, run_id, file_name, delete_at_success=delete_downloaded_files)
                     files.append(file)
+            logging.info(f"{len(run_ids)} recordings downloaded for job-ID {job_id}.")
         return files
 
 
@@ -211,3 +212,4 @@ if __name__ == "__main__":
     )
 
     downloader.download_files(delete_downloaded_files=opt.delete_files)
+    logging.info("Download complete.")

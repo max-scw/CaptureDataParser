@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+import logging
 
 from typing import List
 
@@ -93,7 +94,7 @@ if __name__ == "__main__":
         try:
             data = parse(fl, rename_hfdata=True)
         except Exception as ex:
-            raise Exception(f"Failed to parse {foldername} with exception: {ex}")
+            raise Exception(f"Failed to parse {foldername} with exception") from ex
 
         try:
             # create unique hash from G code
@@ -154,5 +155,4 @@ if __name__ == "__main__":
         i += 1
     df.to_csv(info_file, header=True, index=False)
 
-    find_changed_rows(df[keys_toolinfo])
-    print(f"Exported {k} files + {info_file.name} to {opt.destination}.")
+    logging.info(f"Exported {k} files + {info_file.name} to {opt.destination}.")

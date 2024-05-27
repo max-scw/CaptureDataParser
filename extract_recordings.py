@@ -1,8 +1,10 @@
 from pathlib import Path
 from zipfile import ZipFile
 from tqdm import tqdm
+import logging
 
 from utils import default_argument_parser, parse_arguments
+
 
 def extract_files(folder_src: Path, folder_dst: Path = None) -> Path:
     if folder_dst is None:
@@ -16,6 +18,7 @@ def extract_files(folder_src: Path, folder_dst: Path = None) -> Path:
                 fid.extractall(dst)
         except Exception as ex:
             raise Exception(f"Failed to unzip {src.as_posix()} with exception: {ex}")
+    logging.info(f"{len(files)} files extracted.")
     return folder_dst
 
 
@@ -25,4 +28,3 @@ if __name__ == "__main__":
     opt = parse_arguments(parser)
 
     extract_files(Path(opt.source), Path(opt.destination))
-    print("all files extracted.")
