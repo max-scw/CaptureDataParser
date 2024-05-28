@@ -150,10 +150,10 @@ if __name__ == "__main__":
             # stack columns and convert to image
             img = Image.fromarray(mat)
             # save image
-            filename_parts = ["WFD", key_sig.replace('|', '-')]
+            filename_parts = ["WFD"]
             if ky_flt:
                 filename_parts += [f"{el:g}" if isinstance(el, float) else f"{el}" for el in ky_flt]
-            filename_parts.append(f"{len(lines_rgb)}")
+            filename_parts += [key_sig.replace('|', '-'), f"{len(lines_rgb)}"]
             filename = "_".join(filename_parts) + ".png"
             # save image
             img.save(filename)
