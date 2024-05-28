@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-value", type=float, default=None, help="Maximum value of signals.")
     parser.add_argument("--recordings-to-highlight", type=str, default=None,
                         help="File that lists the recordings to highlight")
+
     # add arguments to aggregate signals
     parser.add_argument("--window-size", type=float, default=-1,
                         help="Window size. See --in-seconds to make it a duration")
@@ -153,7 +154,16 @@ if __name__ == "__main__":
             filename_parts = ["WFD"]
             if ky_flt:
                 filename_parts += [f"{el:g}" if isinstance(el, float) else f"{el}" for el in ky_flt]
+            if opt.window_size > 0:
+                filename_parts += [
+                    f"wz{opt.window_size:g}" + "s" if opt.in_seconds else "",
+                    opt.method
+                ]
+            if opt.limit > 0:
+                filename_parts.append(f"{opt.limit:g}" + "s" if opt.in_seconds else "")
+
             filename_parts += [key_sig.replace('|', '-'), f"{len(lines_rgb)}"]
+
             filename = "_".join(filename_parts) + ".png"
             # save image
             img.save(filename)
