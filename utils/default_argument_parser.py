@@ -32,7 +32,7 @@ def parse_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
 
     # setup logging
     if "logging_level" in opt:
-        level = level = cast_logging_level(opt.logging_level, logging.INFO)
+        level = cast_logging_level(opt.logging_level, logging.INFO)
         logging.basicConfig(
             level=level,
             format="%(asctime)s [%(levelname)s] %(message)s",
