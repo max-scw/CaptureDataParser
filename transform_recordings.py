@@ -89,6 +89,7 @@ if __name__ == "__main__":
     info = []
     k = 0
     for i, fl in enumerate(tqdm(files)):
+        logging.debug(f"Current folder: {fl}")
         foldername = fl[0].parent.name
         # parse file
         try:

@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import pandas as pd
+import logging
 
 from CaptureDataParser.parse_header import parse_header
 from CaptureDataParser.parse_payload import parse_payload
@@ -48,6 +49,7 @@ def parse(
     # find start file: loop through footers
     start_filename = None
     for filename, (_, _, footer) in content.items():
+        logging.debug(f"CaptureDataParser.parse(): {filename}")
         previous_filename = footer["FilePathChain"]["Previous"]
         actual_filename = footer["FilePathChain"]["Actual"]
         assert filename == actual_filename
@@ -103,4 +105,6 @@ def parse(
     return CapturePayload(raw, head0.time)
 
 
-
+if __name__ == "__main__":
+    path_to_files = list(Path("../data/extracted_recordings").glob("*_8b13*/*.json"))
+    parse(path_to_files)
