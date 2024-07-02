@@ -128,13 +128,13 @@ class CaptureFileDownloader:
         else:
             return None
 
-    def delete_file(self, job_id: str, run_id: str) -> None:
+    def delete_file(self, job_id: str, run_id: str) -> bool:
         # build url
         url = f"{self.address_api}/jobs/{job_id}/runs/{run_id}"
 
-        # req = requests.delete(url, auth=self.__credentials, headers=self.default_headers, verify=self.verify_ssl)
-        # self._check_status_code(req, url)
-        # return req.json()
+        req = requests.delete(url, auth=self.__credentials, headers=self.default_headers, verify=self.verify_ssl)
+        self._check_status_code(req, url)
+        return True
 
     def download_files(self, delete_downloaded_files: bool = False) -> List[Path]:
         job_ids = self.get_job_ids()
