@@ -136,8 +136,15 @@ class CaptureFileDownloader:
         self._check_status_code(req, url)
         return True
 
-    def download_files(self, delete_downloaded_files: bool = False) -> List[Path]:
-        job_ids = self.get_job_ids()
+    def download_files(self, delete_downloaded_files: bool = False, job_ids: List[str] = None) -> List[Path]:
+        if job_ids is None:
+            job_ids = self.get_job_ids()
+        elif isinstance(job_ids, str):
+            job_ids = [job_ids]
+        elif isinstance(job_ids, list) and all([isinstance(jid, str) for jid in job_ids]):
+            pass
+        else:
+            raise ValueError(f"Input 'job_ids' is supposed to be a list of job-IDs (strings) or None but was {type(job_ids)}")
 
         files = []
         for job_id in job_ids:
@@ -177,6 +184,7 @@ if __name__ == "__main__":
     parser.add_argument("--password", type=str, help="Corresponding password for authentication at the Capture app.")
     parser.add_argument("--delete-files", action="store_true", help="Delete files after download.")
 
+    parser.add_argument("--job-ids", type=str, nargs="+", default=None, help="Job-IDs to download. Default is all jobs.")
     parser.add_argument("--logging-level", type=str, default="INFO", help="Logging level")
 
     opt = parser.parse_args()
@@ -211,5 +219,7 @@ if __name__ == "__main__":
         download_dir=download_directory,
     )
 
-    downloader.download_files(delete_downloaded_files=opt.delete_files)
+    logging.info(f"Job IDs: {downloader.get_job_ids()}")
+
+    downloader.download_files(delete_downloaded_files=opt.delete_files, job_ids=opt.job_ids)
     logging.info("Download complete.")
