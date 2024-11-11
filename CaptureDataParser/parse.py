@@ -85,9 +85,9 @@ def parse(
         # concatenate signals
         for ky, vl in raw.items():
             if ky in signals:
-                signals[ky] += (vl, )
+                signals[ky] += [vl, ]
             else:
-                signals[ky] = (vl, )
+                signals[ky] = [vl]
 
         # update next filename
         next_filename = footer["FilePathChain"]["Next"]
@@ -100,9 +100,9 @@ def parse(
 
     # concatenate all fields
     for ky, vl in signals.items():
-        signals[ky] = pd.concat(vl, axis=0)
+        signals[ky] = pd.concat(vl, axis=0, ignore_index=True)
 
-    return CapturePayload(raw, head0.time)
+    return CapturePayload(signals, head0.time)
 
 
 if __name__ == "__main__":
