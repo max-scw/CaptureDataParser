@@ -84,10 +84,16 @@ def get_files(
         yield file, df
 
 
-def read_info_files(path: Union[str, Path] = "info*.csv") -> pd.DataFrame:
+def read_info_files(path: Union[str, Path, Generator, List[Union[str, Path]]] = "info*.csv") -> pd.DataFrame:
     """read meta data file"""
     files = []
-    for fl in Path().glob(path.as_posix() if isinstance(path, Path) else path):
+
+    if isinstance(path, (list, Generator)):
+        gen = path
+    else:
+        gen = Path().glob(path.as_posix() if isinstance(path, Path) else path)
+
+    for fl in gen:
         df = pd.read_csv(fl)
         files.append(df)
 
