@@ -8,7 +8,16 @@ from .parse_header import parse_header
 from .parse_payload import parse_payload
 
 # utils
+from .utils import find_changed_rows
 #from CaptureDataParser.utils import check_key_pattern
 
 # allow simpler import
-__all__ = ["CapturePayload", "HeaderData", "SignalHeaderLF", "parse", "parse_header", "parse_payload"]
+__all__ = [
+    "CapturePayload",
+    "HeaderData",
+    "SignalHeaderLF",
+    "parse",
+    "parse_header",
+    "parse_payload",
+    "find_changed_rows"
+]
