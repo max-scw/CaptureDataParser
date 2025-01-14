@@ -91,7 +91,9 @@ def read_info_files(path: Union[str, Path, Generator, List[Union[str, Path]]] = 
     if isinstance(path, (list, Generator)):
         gen = path
     else:
-        gen = Path().glob(path.as_posix() if isinstance(path, Path) else path)
+        # ensure pathlib object
+        path = Path(path)
+        gen = [path] if path.is_absolute() else Path().glob(path.as_posix() if isinstance(path, Path) else path)
 
     for fl in gen:
         df = pd.read_csv(fl)
