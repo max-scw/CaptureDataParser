@@ -165,8 +165,9 @@ if __name__ == "__main__":
             filename_parts += [key_sig.replace('|', '-'), f"{len(lines_rgb)}"]
 
             filename = "_".join(filename_parts) + ".png"
+            export_file = Path(opt.destination) / filename
             # save image
-            img.save(filename)
+            img.save(export_file)
 
-            logging.info(f"Image saved to {filename}.")
+            logging.info(f"Image saved to {export_file.as_posix()}.")
     logging.info(f"done {__file__}.")
